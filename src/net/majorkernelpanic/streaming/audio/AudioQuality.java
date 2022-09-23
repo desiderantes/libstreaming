@@ -18,6 +18,7 @@
 
 package net.majorkernelpanic.streaming.audio;
 
+import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -70,11 +71,15 @@ public class AudioQuality implements Cloneable {
 
 	public static AudioQuality parseQuality(@Nullable final String str, @Nullable final AudioQuality defaultQuality) {
 		final AudioQuality quality = defaultQuality != null ? defaultQuality : DEFAULT_AUDIO_QUALITY.clone();
-		if (str != null) {
+		if (!TextUtils.isEmpty(str)) {
 			final String[] config = str.split("-");
 			try {
-				quality.bitRate = Integer.parseInt(config[0])*1000; // conversion to bit/s
-				quality.samplingRate = Integer.parseInt(config[1]);
+				if (config.length > 0) {
+					quality.bitRate = Integer.parseInt(config[0])*1000; // conversion to bit/s
+				}
+				if (config.length > 1) {
+					quality.samplingRate = Integer.parseInt(config[1]);
+				}
 			} catch (final IndexOutOfBoundsException e) {
 				Log.w(TAG, e);
 			}
