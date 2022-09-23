@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2011-2015 GUIGUI Simon, fyhertz@gmail.com
+ * Copyright (c) 2014 - 2022 t_saki t_saki@serenegiant.com
  *
  * This file is part of libstreaming (https://github.com/fyhertz/libstreaming)
  *
@@ -39,19 +40,10 @@ import android.util.Log;
  * A MediaRecorder that streams what it records using a packetizer from the RTP package.
  * You can't use this class directly !
  */
-public abstract class MediaStream implements Stream {
+public abstract class MediaStream implements IMediaStream {
 	private static final boolean DEBUG = false;	// set false on production
 	private static final String TAG = MediaStream.class.getSimpleName();
 	
-	/** Raw audio/video will be encoded using the MediaRecorder API. */
-	public static final byte MODE_MEDIARECORDER_API = 0x01;
-
-	/** Raw audio/video will be encoded using the MediaCodec API with buffers. */
-	public static final byte MODE_MEDIACODEC_API = 0x02;
-
-	/** Raw audio/video will be encoded using the MediaCode API with a surface. */
-	public static final byte MODE_MEDIACODEC_API_2 = 0x05;
-
 	/** A LocalSocket will be used to feed the MediaRecorder object */
 	public static final byte PIPE_API_LS = 0x01;
 	

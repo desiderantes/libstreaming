@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2011-2015 GUIGUI Simon, fyhertz@gmail.com
+ * Copyright (c) 2014 - 2022 t_saki t_saki@serenegiant.com
  *
  * This file is part of libstreaming (https://github.com/fyhertz/libstreaming)
  *
@@ -50,14 +51,18 @@ import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceHolder.Callback;
 
+import androidx.annotation.NonNull;
+
 /** 
  * Don't use this class directly.
  */
-public abstract class VideoStream extends MediaStream {
+public abstract class VideoStream extends MediaStream implements ILocalVideoStream {
 
 	private static final String TAG = VideoStream.class.getSimpleName();
 
+	@NonNull
 	protected VideoQuality mRequestedQuality = VideoQuality.DEFAULT_VIDEO_QUALITY.clone();
+	@NonNull
 	protected VideoQuality mQuality = mRequestedQuality.clone(); 
 	protected SurfaceHolder.Callback mSurfaceHolderCallback = null;
 	protected SurfaceView mSurfaceView = null;
@@ -226,17 +231,31 @@ public abstract class VideoStream extends MediaStream {
 	 * Sets the orientation of the preview.
 	 * @param orientation The orientation of the preview
 	 */
+	@Deprecated
 	public void setPreviewOrientation(int orientation) {
+		setOrientation(orientation);
+	}
+
+	/**
+	 * Sets the orientation of the preview.
+	 * @param orientation The orientation of the preview
+	 */
+	@Override
+	public void setOrientation(int orientation) {
 		mRequestedOrientation = orientation;
 		mUpdated = false;
 	}
-	
+
+	public int getOrientation() {
+		return mRequestedOrientation;
+	}
+
 	/** 
 	 * Sets the configuration of the stream. You can call this method at any time 
 	 * and changes will take effect next time you call {@link #configure()}.
 	 * @param videoQuality Quality of the stream
 	 */
-	public void setVideoQuality(VideoQuality videoQuality) {
+	public void setVideoQuality(@NonNull final VideoQuality videoQuality) {
 		if (!mRequestedQuality.equals(videoQuality)) {
 			mRequestedQuality = videoQuality.clone();
 			mUpdated = false;
@@ -246,6 +265,7 @@ public abstract class VideoStream extends MediaStream {
 	/** 
 	 * Returns the quality of the stream.  
 	 */
+	@NonNull
 	public VideoQuality getVideoQuality() {
 		return mRequestedQuality;
 	}

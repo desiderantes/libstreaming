@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2011-2015 GUIGUI Simon, fyhertz@gmail.com
+ * Copyright (c) 2014 - 2022 t_saki t_saki@serenegiant.com
  *
  * This file is part of libstreaming (https://github.com/fyhertz/libstreaming)
  *
@@ -18,21 +19,27 @@
 
 package net.majorkernelpanic.streaming;
 
-import java.io.IOException;
 import net.majorkernelpanic.streaming.audio.AACStream;
 import net.majorkernelpanic.streaming.audio.AMRNBStream;
 import net.majorkernelpanic.streaming.audio.AudioQuality;
-import net.majorkernelpanic.streaming.audio.AudioStream;
+import net.majorkernelpanic.streaming.audio.IAudioStream;
 import net.majorkernelpanic.streaming.gl.SurfaceView;
 import net.majorkernelpanic.streaming.video.H263Stream;
 import net.majorkernelpanic.streaming.video.H264Stream;
+import net.majorkernelpanic.streaming.video.ILocalVideoStream;
+import net.majorkernelpanic.streaming.video.IVideoStream;
 import net.majorkernelpanic.streaming.video.VideoQuality;
-import net.majorkernelpanic.streaming.video.VideoStream;
+import net.majorkernelpanic.streaming.video.VideoSource;
+
 import android.content.Context;
 import android.hardware.Camera.CameraInfo;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
 
+import com.serenegiant.streaming.audio.AudioSource;
+
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 /**
  * Call {@link #getInstance()} to get access to the SessionBuilder.
@@ -60,8 +67,16 @@ public class SessionBuilder implements Cloneable {
 	public final static int AUDIO_AAC = 5;
 
 	// Default configuration
+	@NonNull
 	private VideoQuality mVideoQuality = VideoQuality.DEFAULT_VIDEO_QUALITY;
+	@NonNull
 	private AudioQuality mAudioQuality = AudioQuality.DEFAULT_AUDIO_QUALITY;
+	@NonNull
+	private final Bundle mSettings = new Bundle();
+	@Nullable
+	private VideoSource.Factory mVideoFactory = null;
+	@Nullable
+	private AudioSource.Factory mAudioFactory = null;
 	private int mVideoEncoder = VIDEO_H263;
 	private int mAudioEncoder = AUDIO_AMRNB;
 	private int mCamera = CameraInfo.CAMERA_FACING_BACK;
@@ -72,9 +87,7 @@ public class SessionBuilder implements Cloneable {
 	private String mOrigin = null;
 	private String mDestination = null;
 	private Session.Callback mCallback = null;
-
-	// Removes the default public constructor
-	private SessionBuilder() {}
+	private Session.Factory mSessionFactory = null;
 
 	// The SessionManager implements the singleton pattern
 	private static volatile SessionBuilder sInstance = null; 
@@ -83,67 +96,72 @@ public class SessionBuilder implements Cloneable {
 	 * Returns a reference to the {@link SessionBuilder}.
 	 * @return The reference to the {@link SessionBuilder}
 	 */
-	public static final synchronized SessionBuilder getInstance() {
+	public static synchronized SessionBuilder getInstance() {
 		if (sInstance == null) {
 			SessionBuilder.sInstance = new SessionBuilder();
 		}
 		return sInstance;
 	}	
 
-	/**
-	 * Creates a new {@link Session}.
-	 * @param context
-	 * @return The new Session
-	 * @throws IOException 
-	 */
+	public static Session.Factory DefaultSessionFactory = new Session.Factory() {
+		@NonNull
+		@Override
+		public Session createSession(@NonNull final Context context, @NonNull final SessionBuilder builder) {
+			final Session session = new Session();
+			session.setOrigin(builder.getOrigin());
+			session.setDestination(builder.getDestination());
+			session.setTimeToLive(builder.getTimeToLive());
+			session.setCallback(builder.getCallback());
+
+			switch (builder.getAudioEncoder()) {
+			case AUDIO_AAC:
+				final AACStream stream = new AACStream();
+				session.addAudioTrack(stream);
+				stream.setPreferences(PreferenceManager.getDefaultSharedPreferences(context));
+				break;
+			case AUDIO_AMRNB:
+				session.addAudioTrack(new AMRNBStream());
+				break;
+			}
+
+			switch (builder.getVideoEncoder()) {
+			case VIDEO_H263:
+				session.addVideoTrack(new H263Stream(builder.getCamera()));
+				break;
+			case VIDEO_H264:
+				final H264Stream stream = new H264Stream(builder.getCamera());
+				stream.setPreferences(PreferenceManager.getDefaultSharedPreferences(context));
+				session.addVideoTrack(stream);
+				break;
+			}
+
+			final IVideoStream video = session.getVideoTrack();
+			if (video instanceof ILocalVideoStream) {
+				((ILocalVideoStream)video).setFlashState(builder.getFlashState());
+				((ILocalVideoStream)video).setSurfaceView(builder.getSurfaceView());
+			}
+			if (video != null) {
+				video.setVideoQuality(builder.getVideoQuality());
+				video.setOrientation(builder.getOrientation());
+				video.setDestinationPorts(5006);
+			}
+
+			final IAudioStream audio = session.getAudioTrack();
+			if (audio != null) {
+				audio.setAudioQuality(builder.getAudioQuality());
+				audio.setDestinationPorts(5004);
+			}
+
+			return session;
+		}
+	};
+
+	// Removes the default public constructor
+	protected SessionBuilder() {}
+
+	@NonNull
 	public Session build(@NonNull final Context context) {
-		Session session;
-
-		session = new Session();
-		session.setOrigin(mOrigin);
-		session.setDestination(mDestination);
-		session.setTimeToLive(mTimeToLive);
-		session.setCallback(mCallback);
-
-		switch (mAudioEncoder) {
-		case AUDIO_AAC:
-			AACStream stream = new AACStream();
-			session.addAudioTrack(stream);
-			stream.setPreferences(PreferenceManager.getDefaultSharedPreferences(context));
-			break;
-		case AUDIO_AMRNB:
-			session.addAudioTrack(new AMRNBStream());
-			break;
-		}
-
-		switch (mVideoEncoder) {
-		case VIDEO_H263:
-			session.addVideoTrack(new H263Stream(mCamera));
-			break;
-		case VIDEO_H264:
-			H264Stream stream = new H264Stream(mCamera);
-			stream.setPreferences(PreferenceManager.getDefaultSharedPreferences(context));
-			session.addVideoTrack(stream);
-			break;
-		}
-
-		if (session.getVideoTrack()!=null) {
-			VideoStream video = session.getVideoTrack();
-			video.setFlashState(mFlash);
-			video.setVideoQuality(mVideoQuality);
-			video.setSurfaceView(mSurfaceView);
-			video.setPreviewOrientation(mOrientation);
-			video.setDestinationPorts(5006);
-		}
-
-		if (session.getAudioTrack()!=null) {
-			AudioStream audio = session.getAudioTrack();
-			audio.setAudioQuality(mAudioQuality);
-			audio.setDestinationPorts(5004);
-		}
-
-		return session;
-
+		return mSessionFactory.createSession(context, this);
 	}
 
 	/** Sets the destination of the session. */
@@ -164,6 +182,17 @@ public class SessionBuilder implements Cloneable {
 		return this;
 	}
 	
+	/** Sets the default video encoder. */
+	public SessionBuilder setVideoEncoder(int encoder) {
+		mVideoEncoder = encoder;
+		return this;
+	}
+
+	public SessionBuilder setVideoFactory(final VideoSource.Factory factory) {
+		mVideoFactory = factory;
+		return this;
+	}
+
 	/** Sets the audio encoder. */
 	public SessionBuilder setAudioEncoder(int encoder) {
 		mAudioEncoder = encoder;
@@ -176,9 +205,8 @@ public class SessionBuilder implements Cloneable {
 		return this;
 	}
 
-	/** Sets the default video encoder. */
-	public SessionBuilder setVideoEncoder(int encoder) {
-		mVideoEncoder = encoder;
+	public SessionBuilder setAudioFactory(final AudioSource.Factory factory) {
+		mAudioFactory = factory;
 		return this;
 	}
 
@@ -204,7 +232,12 @@ public class SessionBuilder implements Cloneable {
 		mSurfaceView = surfaceView;
 		return this;
 	}
-	
+
+	public SessionBuilder setOrientation(final int orientation) {
+		mOrientation = orientation;
+		return this;
+	}
+
 	/** 
 	 * Sets the orientation of the preview.
 	 * @param orientation The orientation of the preview
@@ -218,8 +251,20 @@ public class SessionBuilder implements Cloneable {
 		mCallback = callback;
 		return this;
 	}
-	
+
+	public SessionBuilder setSessionFactory(final Session.Factory factory) {
+		mSessionFactory = factory;
+		return this;
+	}
+
+	public SessionBuilder setSettings(@NonNull final Bundle settings) {
+		mSettings.clear();
+		mSettings.putAll(settings);
+		return this;
+	}
+
 	/** Returns the destination ip address set with {@link #setDestination(String)}. */
+	@Nullable
 	public String getDestination() {
 		return mDestination;
 	}
@@ -244,14 +289,30 @@ public class SessionBuilder implements Cloneable {
 		return mVideoEncoder;
 	}
 
+	public int getOrientation() {
+		return mOrientation;
+	}
+
 	/** Returns the VideoQuality set with {@link #setVideoQuality(VideoQuality)}. */
+	@NonNull
 	public VideoQuality getVideoQuality() {
 		return mVideoQuality;
 	}
-	
+
+	@Nullable
+	public VideoSource.Factory getVideoFactory() {
+		return mVideoFactory;
+	}
+
 	/** Returns the AudioQuality set with {@link #setAudioQuality(AudioQuality)}. */
+	@NonNull
 	public AudioQuality getAudioQuality() {
 		return mAudioQuality;
+	}
+
+	@Nullable
+	public AudioSource.Factory getAudioFactory() {
+		return mAudioFactory;
 	}
 
 	/** Returns the flash state set with {@link #setFlashEnabled(boolean)}. */
@@ -260,6 +321,7 @@ public class SessionBuilder implements Cloneable {
 	}
 
 	/** Returns the SurfaceView set with {@link #setSurfaceView(SurfaceView)}. */
+	@Nullable
 	public SurfaceView getSurfaceView() {
 		return mSurfaceView;
 	}
@@ -268,6 +330,21 @@ public class SessionBuilder implements Cloneable {
 	/** Returns the time to live set with {@link #setTimeToLive(int)}. */
 	public int getTimeToLive() {
 		return mTimeToLive;
+	}
+
+	@Nullable
+	public Session.Callback getCallback() {
+		return mCallback;
+	}
+
+	@Nullable
+	public Session.Factory getSessionFactory() {
+		return mSessionFactory;
+	}
+
+	@NonNull
+	public Bundle getSettings() {
+		return mSettings;
 	}
 
 	/** Returns a new {@link SessionBuilder} with the same configuration. */
@@ -283,15 +360,19 @@ public class SessionBuilder implements Cloneable {
 		.setDestination(mDestination)
 		.setOrigin(mOrigin)
 		.setSurfaceView(mSurfaceView)
-		.setPreviewOrientation(mOrientation)
+		.setOrientation(mOrientation)
 		.setVideoQuality(mVideoQuality)
 		.setVideoEncoder(mVideoEncoder)
+		.setVideoFactory(mVideoFactory)
 		.setFlashEnabled(mFlash)
 		.setCamera(mCamera)
 		.setTimeToLive(mTimeToLive)
 		.setAudioEncoder(mAudioEncoder)
 		.setAudioQuality(mAudioQuality)
-		.setCallback(mCallback);
+		.setAudioFactory(mAudioFactory)
+		.setCallback(mCallback)
+		.setSettings(mSettings)
+		.setSessionFactory(mSessionFactory);
 	}
 
 }

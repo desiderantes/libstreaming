@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2011-2015 GUIGUI Simon, fyhertz@gmail.com
+ * Copyright (c) 2014 - 2022 t_saki t_saki@serenegiant.com
  *
  * This file is part of libstreaming (https://github.com/fyhertz/libstreaming)
  *
@@ -23,19 +24,26 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import net.majorkernelpanic.streaming.audio.AudioQuality;
 import net.majorkernelpanic.streaming.audio.AudioStream;
+import net.majorkernelpanic.streaming.audio.IAudioStream;
 import net.majorkernelpanic.streaming.exceptions.CameraInUseException;
 import net.majorkernelpanic.streaming.exceptions.ConfNotSupportedException;
 import net.majorkernelpanic.streaming.exceptions.InvalidSurfaceException;
 import net.majorkernelpanic.streaming.exceptions.StorageUnavailableException;
 import net.majorkernelpanic.streaming.gl.SurfaceView;
 import net.majorkernelpanic.streaming.rtsp.RtspClient;
+import net.majorkernelpanic.streaming.video.ILocalVideoStream;
+import net.majorkernelpanic.streaming.video.IVideoStream;
 import net.majorkernelpanic.streaming.video.VideoQuality;
 import net.majorkernelpanic.streaming.video.VideoStream;
+
+import android.content.Context;
 import android.hardware.Camera.CameraInfo;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
 
 /**
  * You should instantiate this class with the {@link SessionBuilder}.<br />
@@ -98,13 +106,18 @@ public class Session {
 	 */
 	public final static int ERROR_OTHER = 0x06;
 
+	public interface Factory {
+		@NonNull
+		public Session createSession(@NonNull final Context context, @NonNull final SessionBuilder builder);
+	}
+
 	private String mOrigin;
 	private String mDestination;
 	private int mTimeToLive = 64;
 	private long mTimestamp;
 
-	private AudioStream mAudioStream = null;
-	private VideoStream mVideoStream = null;
+	private IAudioStream mAudioStream = null;
+	private IVideoStream mVideoStream = null;
 
 	private Callback mCallback;
 	private Handler mMainHandler;
@@ -173,7 +186,7 @@ public class Session {
 	}
 
 	/** You probably don't need to use that directly, use the {@link SessionBuilder}. */
-	public void addAudioTrack(AudioStream track) {
+	public void addAudioTrack(final IAudioStream track) {
 		removeAudioTrack();
 		mAudioStream = track;
 	}
@@ -194,14 +207,14 @@ public class Session {
 
 	/** You probably don't need to use that directly, use the {@link SessionBuilder}. */
 	public void removeVideoTrack() {
-		if (mVideoStream != null) {
-			mVideoStream.stopPreview();
-			mVideoStream = null;
+		if (mVideoStream instanceof ILocalVideoStream) {
+			((ILocalVideoStream)mVideoStream).stopPreview();
 		}
+		mVideoStream = null;
 	}
 
 	/** Returns the underlying {@link AudioStream} used by the {@link Session}. */
-	public AudioStream getAudioTrack() {
+	public IAudioStream getAudioTrack() {
 		return mAudioStream;
 	}
 
@@ -227,6 +240,10 @@ public class Session {
 		mOrigin = origin;
 	}	
 
+	public String getOrigin() {
+		return mOrigin;
+	}
+
 	/** 
 	 * The destination address for all the streams of the session. <br />
 	 * Changes will be taken into account the next time you start the session.
@@ -243,6 +260,10 @@ public class Session {
 	 */
 	public void setTimeToLive(int ttl) {
 		mTimeToLive = ttl;
+	}
+
+	public int getTimeToLive() {
+		return mTimeToLive;
 	}
 
 	/** 
@@ -266,8 +287,8 @@ public class Session {
 		mHandler.post(new Runnable() {
 			@Override
 			public void run() {
-				if (mVideoStream != null) {
-					mVideoStream.setSurfaceView(view);
+				if (mVideoStream instanceof ILocalVideoStream) {
+					((ILocalVideoStream)mVideoStream).setSurfaceView(view);
 				}
 			}				
 		});
@@ -281,7 +302,7 @@ public class Session {
 	 */
 	public void setPreviewOrientation(int orientation) {
 		if (mVideoStream != null) {
-			mVideoStream.setPreviewOrientation(orientation);
+			mVideoStream.setOrientation(orientation);
 		}
 	}	
 
@@ -544,9 +565,9 @@ public class Session {
 		mHandler.post(new Runnable() {
 			@Override
 			public void run() {
-				if (mVideoStream != null) {
+				if (mVideoStream instanceof ILocalVideoStream) {
 					try {
-						mVideoStream.startPreview();
+						((ILocalVideoStream)mVideoStream).startPreview();
 						postPreviewStarted();
 						mVideoStream.configure();
 					} catch (CameraInUseException e) {
@@ -574,8 +595,8 @@ public class Session {
 		mHandler.post(new Runnable() {
 			@Override
 			public void run() {
-				if (mVideoStream != null) {
-					mVideoStream.stopPreview();
+				if (mVideoStream instanceof ILocalVideoStream) {
+					((ILocalVideoStream)mVideoStream).stopPreview();
 				}
 			}
 		});
@@ -590,9 +611,9 @@ public class Session {
 		mHandler.post(new Runnable() {
 			@Override
 			public void run() {
-				if (mVideoStream != null) {
+				if (mVideoStream instanceof ILocalVideoStream) {
 					try {
-						mVideoStream.switchCamera();
+						((ILocalVideoStream)mVideoStream).switchCamera();
 						postPreviewStarted();
 					} catch (CameraInUseException e) {
 						postError(ERROR_CAMERA_ALREADY_IN_USE , STREAM_VIDEO, e);
@@ -616,7 +637,8 @@ public class Session {
 	 * {@link CameraInfo#CAMERA_FACING_FRONT}.
 	 */
 	public int getCamera() {
-		return mVideoStream != null ? mVideoStream.getCamera() : 0;
+		return mVideoStream instanceof ILocalVideoStream
+			? ((ILocalVideoStream)mVideoStream).getCamera() : 0;
 
 	}
 
@@ -629,9 +651,9 @@ public class Session {
 		mHandler.post(new Runnable() {
 			@Override
 			public void run() {
-				if (mVideoStream != null) {
+				if (mVideoStream instanceof ILocalVideoStream) {
 					try {
-						mVideoStream.toggleFlash();
+						((ILocalVideoStream)mVideoStream).toggleFlash();
 					} catch (RuntimeException e) {
 						postError(ERROR_CAMERA_HAS_NO_FLASH, STREAM_VIDEO, e);
 					}
@@ -713,7 +735,7 @@ public class Session {
 		});
 	}		
 
-	private Runnable mUpdateBitrate = new Runnable() {
+	private final Runnable mUpdateBitrate = new Runnable() {
 		@Override
 		public void run() {
 			if (isStreaming()) { 

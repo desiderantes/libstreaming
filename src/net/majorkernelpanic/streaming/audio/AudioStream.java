@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2011-2015 GUIGUI Simon, fyhertz@gmail.com
+ * Copyright (c) 2014 - 2022 t_saki t_saki@serenegiant.com
  *
  * This file is part of libstreaming (https://github.com/fyhertz/libstreaming)
  *
@@ -30,7 +31,7 @@ import android.util.Log;
 /** 
  * Don't use this class directly.
  */
-public abstract class AudioStream  extends MediaStream {
+public abstract class AudioStream  extends MediaStream implements IAudioStream {
 
 	private static final String TAG = AudioStream.class.getSimpleName();
 
@@ -48,6 +49,7 @@ public abstract class AudioStream  extends MediaStream {
 		mAudioSource = audioSource;
 	}
 
+	@Override
 	public void setAudioQuality(AudioQuality quality) {
 		mRequestedQuality = quality;
 	}
@@ -55,6 +57,7 @@ public abstract class AudioStream  extends MediaStream {
 	/** 
 	 * Returns the quality of the stream.  
 	 */
+	@Override
 	public AudioQuality getAudioQuality() {
 		return mQuality;
 	}	
