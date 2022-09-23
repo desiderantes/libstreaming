@@ -35,7 +35,7 @@ import android.util.Log;
 @SuppressLint("NewApi")
 public class AACLATMPacketizer extends AbstractPacketizer implements Runnable {
 
-	private final static String TAG = "AACLATMPacketizer";
+	private static final String TAG = AACLATMPacketizer.class.getSimpleName();
 
 	private Thread t;
 

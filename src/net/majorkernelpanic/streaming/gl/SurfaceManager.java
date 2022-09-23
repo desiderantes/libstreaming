@@ -31,10 +31,12 @@ import android.opengl.EGLSurface;
 import android.opengl.GLES20;
 import android.view.Surface;
 
+import net.majorkernelpanic.streaming.hw.CodecManager;
+
 @SuppressLint("NewApi")
 public class SurfaceManager {
 
-	public final static String TAG = "TextureManager";
+	private static final String TAG = SurfaceManager.class.getSimpleName();
 
 	private static final int EGL_RECORDABLE_ANDROID = 0x3142;
 

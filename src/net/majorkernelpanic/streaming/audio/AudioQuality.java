@@ -23,6 +23,8 @@ package net.majorkernelpanic.streaming.audio;
  */
 public class AudioQuality {
 
+	private static final String TAG = AudioQuality.class.getSimpleName();
+
 	/** Default audio stream quality. */
 	public final static AudioQuality DEFAULT_AUDIO_QUALITY = new AudioQuality(8000,32000);
 

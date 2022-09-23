@@ -22,10 +22,14 @@ import java.nio.ByteBuffer;
 import android.media.MediaCodecInfo;
 import android.util.Log;
 
+import net.majorkernelpanic.streaming.mp4.MP4Parser;
+
 /**
  * Converts from NV21 to YUV420 semi planar or planar.
  */		
 public class NV21Convertor {
+
+	private static final String TAG = NV21Convertor.class.getSimpleName();
 
 	private int mSliceHeight, mHeight;
 	private int mStride, mWidth;

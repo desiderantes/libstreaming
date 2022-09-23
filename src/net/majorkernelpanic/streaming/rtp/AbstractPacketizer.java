@@ -32,6 +32,7 @@ import net.majorkernelpanic.streaming.rtcp.SenderReport;
  */
 abstract public class AbstractPacketizer {
 
+	private static final String TAG = AbstractPacketizer.class.getSimpleName();
 	protected static final int rtphl = RtpSocket.RTP_HEADER_LENGTH;
 	
 	// Maximum size of RTP packets

@@ -41,7 +41,7 @@ import android.util.Log;
  */
 public abstract class MediaStream implements Stream {
 
-	protected static final String TAG = "MediaStream";
+	private static final String TAG = MediaStream.class.getSimpleName();
 	
 	/** Raw audio/video will be encoded using the MediaRecorder API. */
 	public static final byte MODE_MEDIARECORDER_API = 0x01;

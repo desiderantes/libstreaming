@@ -23,13 +23,15 @@ import java.io.IOException;
 import android.util.Base64;
 import android.util.Log;
 
+import net.majorkernelpanic.streaming.rtcp.SenderReport;
+
 /**
  * Finds SPS & PPS parameters in mp4 file.
  */
 public class MP4Config {
 
-	public final static String TAG = "MP4Config";
-	
+	private static final String TAG = MP4Config.class.getSimpleName();
+
 	private MP4Parser mp4Parser;
 	private String mProfilLevel, mPPS, mSPS;
 

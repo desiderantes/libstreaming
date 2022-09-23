@@ -38,7 +38,7 @@ import android.preference.PreferenceManager;
  */
 public class SessionBuilder {
 
-	public final static String TAG = "SessionBuilder";
+	private static final String TAG = SessionBuilder.class.getSimpleName();
 
 	/** Can be used with {@link #setVideoEncoder}. */
 	public final static int VIDEO_NONE = 0;

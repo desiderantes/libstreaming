@@ -35,6 +35,7 @@ import net.majorkernelpanic.streaming.MediaStream;
 import net.majorkernelpanic.streaming.Session;
 import net.majorkernelpanic.streaming.SessionBuilder;
 import net.majorkernelpanic.streaming.audio.AudioQuality;
+import net.majorkernelpanic.streaming.video.CodecManager;
 import net.majorkernelpanic.streaming.video.VideoQuality;
 
 import android.content.ContentValues;
@@ -45,7 +46,7 @@ import android.hardware.Camera.CameraInfo;
  */
 public class UriParser {
 
-	public final static String TAG = "UriParser";
+	private static final String TAG = UriParser.class.getSimpleName();
 
 	/**
 	 * Configures a Session according to the given URI.

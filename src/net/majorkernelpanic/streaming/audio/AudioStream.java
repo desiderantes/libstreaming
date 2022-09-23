@@ -32,6 +32,8 @@ import android.util.Log;
  */
 public abstract class AudioStream  extends MediaStream {
 
+	private static final String TAG = AudioStream.class.getSimpleName();
+
 	protected int mAudioSource;
 	protected int mOutputFormat;
 	protected int mAudioEncoder;

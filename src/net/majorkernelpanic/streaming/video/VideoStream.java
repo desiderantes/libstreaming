@@ -55,7 +55,7 @@ import android.view.SurfaceHolder.Callback;
  */
 public abstract class VideoStream extends MediaStream {
 
-	protected final static String TAG = "VideoStream";
+	private static final String TAG = VideoStream.class.getSimpleName();
 
 	protected VideoQuality mRequestedQuality = VideoQuality.DEFAULT_VIDEO_QUALITY.clone();
 	protected VideoQuality mQuality = mRequestedQuality.clone(); 

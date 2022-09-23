@@ -51,7 +51,7 @@ import android.util.Log;
 @SuppressLint("NewApi")
 public class EncoderDebugger {
 
-	public final static String TAG = "EncoderDebugger";
+	private static final String TAG = EncoderDebugger.class.getSimpleName();
 
 	/** Prefix that will be used for all shared preferences saved by libstreaming. */
 	private static final String PREF_PREFIX = "libstreaming-";

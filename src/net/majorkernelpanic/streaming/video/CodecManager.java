@@ -30,7 +30,7 @@ import android.util.SparseArray;
 @SuppressLint("InlinedApi")
 public class CodecManager {
 
-	public final static String TAG = "CodecManager";
+	private static final String TAG = CodecManager.class.getSimpleName();
 	
 	public static final int[] SUPPORTED_COLOR_FORMATS = {
 		MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Planar,

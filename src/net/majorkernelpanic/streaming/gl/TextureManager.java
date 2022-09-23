@@ -37,7 +37,7 @@ import android.util.Log;
 @SuppressLint("InlinedApi")
 public class TextureManager {
 	
-	public final static String TAG = "TextureManager";
+	private static final String TAG = TextureManager.class.getSimpleName();
 	
 	private static final int FLOAT_SIZE_BYTES = 4;
 	private static final int TRIANGLE_VERTICES_DATA_STRIDE_BYTES = 5 * FLOAT_SIZE_BYTES;

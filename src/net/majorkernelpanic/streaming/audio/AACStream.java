@@ -51,7 +51,7 @@ import android.util.Log;
  */
 public class AACStream extends AudioStream {
 
-	public final static String TAG = "AACStream";
+	private static final String TAG = AACStream.class.getSimpleName();
 
 	/** MPEG-4 Audio Object Types supported by ADTS. **/
 	private static final String[] AUDIO_OBJECT_TYPES = {

@@ -47,7 +47,7 @@ import android.util.Log;
  */
 public class H264Stream extends VideoStream {
 
-	public final static String TAG = "H264Stream";
+	private static final String TAG = H264Stream.class.getSimpleName();
 
 	private Semaphore mLock = new Semaphore(0);
 	private MP4Config mConfig;

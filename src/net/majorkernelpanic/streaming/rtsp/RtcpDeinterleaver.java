@@ -25,7 +25,7 @@ import java.io.PipedOutputStream;
 
 class RtcpDeinterleaver extends InputStream implements Runnable {
 	
-	public final static String TAG = "RtcpDeinterleaver";
+	private static final String TAG = RtcpDeinterleaver.class.getSimpleName();
 	
 	private IOException mIOException;
 	private InputStream mInputStream;

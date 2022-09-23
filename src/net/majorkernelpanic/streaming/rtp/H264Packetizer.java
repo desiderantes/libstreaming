@@ -34,7 +34,7 @@ import android.util.Log;
  */
 public class H264Packetizer extends AbstractPacketizer implements Runnable {
 
-	public final static String TAG = "H264Packetizer";
+	private static final String TAG = H264Packetizer.class.getSimpleName();
 
 	private Thread t = null;
 	private int naluLength = 0;

@@ -61,7 +61,7 @@ import android.os.Looper;
  */
 public class Session {
 
-	public final static String TAG = "Session";
+	private static final String TAG = Session.class.getSimpleName();
 
 	public final static int STREAM_VIDEO = 0x01;
 

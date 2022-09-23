@@ -34,6 +34,8 @@ import android.service.textservice.SpellCheckerService.Session;
  */
 public class AMRNBStream extends AudioStream {
 
+	private static final String TAG = AMRNBStream.class.getSimpleName();
+
 	public AMRNBStream() {
 		super();
 

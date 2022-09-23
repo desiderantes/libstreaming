@@ -35,7 +35,7 @@ import android.util.Log;
  */
 public class AACADTSPacketizer extends AbstractPacketizer implements Runnable {
 
-	private final static String TAG = "AACADTSPacketizer";
+	private static final String TAG = AACADTSPacketizer.class.getSimpleName();
 
 	private Thread t;
 	private int samplingRate = 8000;

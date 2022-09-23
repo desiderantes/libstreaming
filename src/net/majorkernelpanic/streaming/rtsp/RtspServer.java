@@ -56,7 +56,7 @@ import android.util.Log;
  */
 public class RtspServer extends Service {
 
-	public final static String TAG = "RtspServer";
+	private static final String TAG = RtspServer.class.getSimpleName();
 
 	/** The server name that will appear in responses. */
 	public static String SERVER_NAME = "MajorKernelPanic RTSP Server";

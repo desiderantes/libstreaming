@@ -35,7 +35,7 @@ import android.util.Log;
 @SuppressLint("NewApi")
 public class MediaCodecInputStream extends InputStream {
 
-	public final String TAG = "MediaCodecInputStream"; 
+	private static final String TAG = MediaCodecInputStream.class.getSimpleName();
 
 	private MediaCodec mMediaCodec = null;
 	private BufferInfo mBufferInfo = new BufferInfo();

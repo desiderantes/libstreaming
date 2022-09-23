@@ -33,7 +33,7 @@ import android.util.Log;
  */
 public class AMRNBPacketizer extends AbstractPacketizer implements Runnable {
 
-	public final static String TAG = "AMRNBPacketizer";
+	private static final String TAG = AMRNBPacketizer.class.getSimpleName();
 
 	private final int AMR_HEADER_LENGTH = 6; // "#!AMR\n"
 	private static final int AMR_FRAME_HEADER_LENGTH = 1; // Each frame has a short header

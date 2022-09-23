@@ -30,7 +30,7 @@ import android.util.Log;
  */
 public class VideoQuality {
 
-	public final static String TAG = "VideoQuality";
+	private static final String TAG = VideoQuality.class.getSimpleName();
 	
 	/** Default video stream quality. */
 	public final static VideoQuality DEFAULT_VIDEO_QUALITY = new VideoQuality(176,144,20,500000);

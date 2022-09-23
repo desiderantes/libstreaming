@@ -29,11 +29,14 @@ import java.nio.channels.IllegalSelectorException;
 import android.os.SystemClock;
 import android.util.Log;
 
+import net.majorkernelpanic.streaming.rtp.RtpSocket;
+
 /**
  * Implementation of Sender Report RTCP packets.
  */
 public class SenderReport {
 
+	private static final String TAG = SenderReport.class.getSimpleName();
 	public static final int MTU = 1500;
 
 	private static final int PACKET_LENGTH = 28;

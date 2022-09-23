@@ -37,7 +37,7 @@ import android.util.Log;
  */
 public class RtpSocket implements Runnable {
 
-	public static final String TAG = "RtpSocket";
+	private static final String TAG = RtpSocket.class.getSimpleName();
 
 	/** Use this to use UDP for the transport protocol. */
 	public final static int TRANSPORT_UDP = 0x00;

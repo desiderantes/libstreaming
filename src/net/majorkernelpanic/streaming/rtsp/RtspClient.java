@@ -49,7 +49,7 @@ import android.util.Log;
  */
 public class RtspClient {
 
-	public final static String TAG = "RtspClient";
+	private static final String TAG = RtspClient.class.getSimpleName();
 
 	/** Message sent when the connection to the RTSP server failed. */
 	public final static int ERROR_CONNECTION_FAILED = 0x01;

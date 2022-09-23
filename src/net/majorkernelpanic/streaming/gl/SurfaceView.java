@@ -50,7 +50,7 @@ import android.view.SurfaceHolder;
  */
 public class SurfaceView extends android.view.SurfaceView implements Runnable, OnFrameAvailableListener, SurfaceHolder.Callback {
 
-	public final static String TAG = "SurfaceView";
+	private static final String TAG = SurfaceView.class.getSimpleName();
 
 	/** 
 	 * The aspect ratio of the surface view will be equal 

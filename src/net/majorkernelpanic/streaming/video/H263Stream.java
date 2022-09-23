@@ -35,6 +35,8 @@ import android.service.textservice.SpellCheckerService.Session;
  */
 public class H263Stream extends VideoStream {
 
+	private static final String TAG = H263Stream.class.getSimpleName();
+
 	/**
 	 * Constructs the H.263 stream.
 	 * Uses CAMERA_FACING_BACK by default.
