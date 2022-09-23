@@ -81,12 +81,16 @@ public class CodecManager {
 					// We want a hardware encoder
 					list.hardwareCodec = hardwareCodecs.get(colorFormatSurface).get(0);
 					list.hardwareColorFormat = colorFormatSurface;
-				} catch (Exception e) {}
+				} catch (final Exception e) {
+					Log.w(TAG, e);
+				}
 				try {
 					// We want a software encoder
 					list.softwareCodec = softwareCodecs.get(colorFormatSurface).get(0);
 					list.softwareColorFormat = colorFormatSurface;
-				} catch (Exception e) {}
+				} catch (final Exception e) {
+					Log.w(TAG, e);
+				}
 
 				if (list.hardwareCodec != null) {
 					Log.v(TAG,"Choosen primary codec: "+list.hardwareCodec+" with color format: "+list.hardwareColorFormat);
@@ -106,14 +110,18 @@ public class CodecManager {
 					list.hardwareCodec = hardwareCodecs.get(SUPPORTED_COLOR_FORMATS[i]).get(0);
 					list.hardwareColorFormat = SUPPORTED_COLOR_FORMATS[i];
 					break;
-				} catch (Exception e) {}
+				} catch (final Exception e) {
+					Log.w(TAG, e);
+				}
 			}
 			for (int i=0;i<SUPPORTED_COLOR_FORMATS.length;i++) {
 				try {
 					list.softwareCodec = softwareCodecs.get(SUPPORTED_COLOR_FORMATS[i]).get(0);
 					list.softwareColorFormat = SUPPORTED_COLOR_FORMATS[i];
 					break;
-				} catch (Exception e) {}
+				} catch (final Exception e) {
+					Log.w(TAG, e);
+				}
 			}
 
 			if (list.hardwareCodec != null) {

@@ -33,7 +33,7 @@ import android.util.Log;
  * This class is used by H264Stream.java to determine the SPS and PPS parameters of a short video recorded by the phone.
  */
 public class MP4Parser {
-
+	private static final boolean DEBUG = false;	// set false on production
 	private static final String TAG = MP4Parser.class.getSimpleName();
 
 	private HashMap<String, Long> mBoxes = new HashMap<>();
@@ -59,7 +59,9 @@ public class MP4Parser {
 	public void close() {
 		try {
 			mFile.close();
-		} catch (Exception e) {};
+		} catch (final Exception e) {
+			Log.w(TAG, e);
+		}
 	}
 	
 	public long getBoxPos(String box) throws IOException {

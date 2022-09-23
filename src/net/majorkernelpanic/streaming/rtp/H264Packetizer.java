@@ -39,7 +39,7 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
 	private Thread t = null;
 	private int naluLength = 0;
 	private long delay = 0, oldtime = 0;
-	private Statistics stats = new Statistics();
+	private final Statistics stats = new Statistics();
 	private byte[] sps = null, pps = null, stapa = null;
 	byte[] header = new byte[5];	
 	private int count = 0;
@@ -62,11 +62,15 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
 		if (t != null) {
 			try {
 				is.close();
-			} catch (IOException e) {}
+			} catch (IOException e) {
+				Log.w(TAG, e);
+			}
 			t.interrupt();
 			try {
 				t.join();
-			} catch (InterruptedException e) {}
+			} catch (final InterruptedException e) {
+				// ignore
+			}
 			t = null;
 		}
 	}
@@ -126,8 +130,11 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
 				//Log.d(TAG,"duration: "+duration/1000000+" delay: "+delay/1000000);
 
 			}
-		} catch (IOException e) {
-		} catch (InterruptedException e) {}
+		} catch (final IOException e) {
+			Log.w(TAG, e);
+		} catch (final InterruptedException e) {
+			// ignore
+		}
 
 		Log.d(TAG,"H264 packetizer stopped !");
 

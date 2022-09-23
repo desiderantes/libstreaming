@@ -35,6 +35,7 @@ import android.hardware.Camera.CameraInfo;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
+import android.util.Log;
 
 /**
  * You should instantiate this class with the {@link SessionBuilder}.<br />
@@ -362,7 +363,9 @@ public class Session {
 			public void run() {
 				try {
 					syncConfigure();
-				} catch (Exception e) {};
+				} catch (final Exception e) {
+					Log.w(TAG, e);
+				};
 			}
 		});
 	}	
@@ -419,7 +422,9 @@ public class Session {
 			public void run() {
 				try {
 					syncStart();
-				} catch (Exception e) {}
+				} catch (final Exception e) {
+					Log.w(TAG, e);
+				}
 			}				
 		});
 	}

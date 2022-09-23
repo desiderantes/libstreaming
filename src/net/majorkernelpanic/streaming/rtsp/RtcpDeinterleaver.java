@@ -18,6 +18,8 @@
 
 package net.majorkernelpanic.streaming.rtsp;
 
+import android.util.Log;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PipedInputStream;
@@ -38,7 +40,9 @@ class RtcpDeinterleaver extends InputStream implements Runnable {
 		mPipedInputStream = new PipedInputStream(4096);
 		try {
 			mPipedOutputStream = new PipedOutputStream(mPipedInputStream);
-		} catch (IOException e) {}
+		} catch (final IOException e) {
+			Log.w(TAG, e);
+		}
 		mBuffer = new byte[1024];
 		new Thread(this).start();
 	}
@@ -53,7 +57,9 @@ class RtcpDeinterleaver extends InputStream implements Runnable {
 		} catch (IOException e) {
 			try {
 				mPipedInputStream.close();
-			} catch (IOException ignore) {}
+			} catch (final IOException e1) {
+				Log.w(TAG, e1);
+			}
 			mIOException = e;
 		}
 	}

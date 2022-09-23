@@ -175,7 +175,9 @@ public class H264Stream extends VideoStream {
 			lockCamera();
 			try {
 				mCamera.stopPreview();
-			} catch (Exception e) {}
+			} catch (final Exception e) {
+				Log.w(TAG, e);
+			}
 			mPreviewStarted = false;
 		}
 
@@ -238,7 +240,9 @@ public class H264Stream extends VideoStream {
 		} finally {
 			try {
 				mMediaRecorder.stop();
-			} catch (Exception e) {}
+			} catch (final Exception e) {
+				Log.w(TAG, e);
+			}
 			mMediaRecorder.release();
 			mMediaRecorder = null;
 			lockCamera();
@@ -249,7 +253,9 @@ public class H264Stream extends VideoStream {
 				// If the preview was started before the test, we try to restart it.
 				try {
 					startPreview();
-				} catch (Exception e) {}
+				} catch (final Exception e) {
+					Log.w(TAG, e);
+				}
 			}
 		}
 

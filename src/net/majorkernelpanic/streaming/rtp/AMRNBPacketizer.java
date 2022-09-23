@@ -32,7 +32,7 @@ import android.util.Log;
  *   
  */
 public class AMRNBPacketizer extends AbstractPacketizer implements Runnable {
-
+	private static final boolean DEBUG = false; // set false on production
 	private static final String TAG = AMRNBPacketizer.class.getSimpleName();
 
 	private final int AMR_HEADER_LENGTH = 6; // "#!AMR\n"
@@ -58,11 +58,15 @@ public class AMRNBPacketizer extends AbstractPacketizer implements Runnable {
 		if (t != null) {
 			try {
 				is.close();
-			} catch (IOException ignore) {}
+			} catch (final IOException e) {
+				if (DEBUG) Log.w(TAG, e);
+			}
 			t.interrupt();
 			try {
 				t.join();
-			} catch (InterruptedException e) {}
+			} catch (final InterruptedException e) {
+				// ignore
+			}
 			t = null;
 		}
 	}
@@ -112,8 +116,11 @@ public class AMRNBPacketizer extends AbstractPacketizer implements Runnable {
 				
 			}
 
-		} catch (IOException e) { 
-		} catch (InterruptedException e) {}
+		} catch (final IOException e) {
+			if (DEBUG) Log.w(TAG, e);
+		} catch (final InterruptedException e) {
+			// ignore
+		}
 
 		Log.d(TAG,"AMR packetizer stopped !");
 

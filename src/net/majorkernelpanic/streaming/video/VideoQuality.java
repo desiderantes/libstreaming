@@ -101,8 +101,9 @@ public class VideoQuality implements Cloneable {
 				quality.framerate = Integer.parseInt(config[1]);
 				quality.resX = Integer.parseInt(config[2]);
 				quality.resY = Integer.parseInt(config[3]);
+			} catch (final IndexOutOfBoundsException e) {
+				Log.w(TAG, e);
 			}
-			catch (IndexOutOfBoundsException ignore) {}
 		}
 		return quality;
 	}

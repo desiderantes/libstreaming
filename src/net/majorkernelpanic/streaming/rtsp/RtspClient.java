@@ -50,7 +50,7 @@ import androidx.annotation.NonNull;
  * It implements Digest Access Authentication according to RFC 2069. 
  */
 public class RtspClient {
-
+	private static final boolean DEBUG = false;	// set false on production
 	private static final String TAG = RtspClient.class.getSimpleName();
 
 	/** Message sent when the connection to the RTSP server failed. */
@@ -300,10 +300,14 @@ public class RtspClient {
 	private void abort() {
 		try {
 			sendRequestTeardown();
-		} catch (Exception ignore) {}
+		} catch (final Exception e) {
+			if (DEBUG) Log.w(TAG, e);
+		}
 		try {
 			mSocket.close();
-		} catch (Exception ignore) {}
+		} catch (Exception e) {
+			if (DEBUG) Log.w(TAG, e);
+		}
 		mHandler.removeCallbacks(mConnectionMonitor);
 		mHandler.removeCallbacks(mRetryConnection);
 		mState = STATE_STOPPED;
@@ -548,8 +552,11 @@ public class RtspClient {
 		try {
 			md = MessageDigest.getInstance("MD5");
 			return bytesToHex(md.digest(buffer.getBytes("UTF-8")));
-		} catch (NoSuchAlgorithmException ignore) {
-		} catch (UnsupportedEncodingException e) {}
+		} catch (final NoSuchAlgorithmException e) {
+			if (DEBUG) Log.w(TAG, e);
+		} catch (final UnsupportedEncodingException e) {
+			Log.w(TAG, e);
+		}
 		return "";
 	}
 

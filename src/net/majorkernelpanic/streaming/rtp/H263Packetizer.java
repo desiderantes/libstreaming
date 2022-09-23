@@ -31,9 +31,10 @@ import android.util.Log;
  *   
  */
 public class H263Packetizer extends AbstractPacketizer implements Runnable {
-
+	private static final boolean DEBUG = false;	// set false on production
 	private static final String TAG = H263Packetizer.class.getSimpleName();
-	private Statistics stats = new Statistics();
+
+	private final Statistics stats = new Statistics();
 
 	private Thread t;
 
@@ -53,11 +54,15 @@ public class H263Packetizer extends AbstractPacketizer implements Runnable {
 		if (t != null) {
 			try {
 				is.close();
-			} catch (IOException ignore) {}
+			} catch (final IOException e) {
+				if (DEBUG) Log.w(TAG, e);
+			}
 			t.interrupt();
 			try {
 				t.join();
-			} catch (InterruptedException e) {}
+			} catch (final InterruptedException e) {
+				// ignore
+			}
 			t = null;
 		}
 	}
@@ -120,8 +125,11 @@ public class H263Packetizer extends AbstractPacketizer implements Runnable {
 					send(MAXPACKETSIZE);
 				}
 			}
-		} catch (IOException e) { 
-		} catch (InterruptedException e) {}
+		} catch (final IOException e) {
+			if (DEBUG) Log.w(TAG, e);
+		} catch (final InterruptedException e) {
+			// ignore
+		}
 
 		Log.d(TAG,"H263 Packetizer stopped !");
 

@@ -33,7 +33,7 @@ import android.util.Log;
  */
 @SuppressLint("NewApi")
 public class AACLATMPacketizer extends AbstractPacketizer implements Runnable {
-
+	private static final boolean DEBUG = false;	// set false on production
 	private static final String TAG = AACLATMPacketizer.class.getSimpleName();
 
 	private Thread t;
@@ -54,11 +54,15 @@ public class AACLATMPacketizer extends AbstractPacketizer implements Runnable {
 		if (t != null) {
 			try {
 				is.close();
-			} catch (IOException ignore) {}
+			} catch (final IOException e) {
+				if (DEBUG) Log.w(TAG, e);
+			}
 			t.interrupt();
 			try {
 				t.join();
-			} catch (InterruptedException e) {}
+			} catch (final InterruptedException e) {
+				// ignore
+			}
 			t = null;
 		}
 	}
@@ -118,11 +122,14 @@ public class AACLATMPacketizer extends AbstractPacketizer implements Runnable {
 				}		
 				
 			}
-		} catch (IOException e) {
-		} catch (ArrayIndexOutOfBoundsException e) {
+		} catch (final IOException e) {
+			if (DEBUG) Log.w(TAG, e);
+		} catch (final ArrayIndexOutOfBoundsException e) {
 			Log.e(TAG,"ArrayIndexOutOfBoundsException: "+(e.getMessage()!=null?e.getMessage():"unknown error"));
 			e.printStackTrace();
-		} catch (InterruptedException ignore) {}
+		} catch (final InterruptedException ignore) {
+			// ignore
+		}
 
 		Log.d(TAG,"AAC LATM packetizer stopped !");
 

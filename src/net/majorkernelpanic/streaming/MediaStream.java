@@ -40,7 +40,7 @@ import android.util.Log;
  * You can't use this class directly !
  */
 public abstract class MediaStream implements Stream {
-
+	private static final boolean DEBUG = false;	// set false on production
 	private static final String TAG = MediaStream.class.getSimpleName();
 	
 	/** Raw audio/video will be encoded using the MediaRecorder API. */
@@ -333,7 +333,9 @@ public abstract class MediaStream implements Stream {
 					mSocketId = new Random().nextInt();
 					mLss = new LocalServerSocket(LOCAL_ADDR+mSocketId);
 					break;
-				} catch (IOException e1) {}
+				} catch (final IOException e1) {
+					if (DEBUG) Log.w(TAG, e1);
+				}
 			}
 	
 			mReceiver = new LocalSocket();

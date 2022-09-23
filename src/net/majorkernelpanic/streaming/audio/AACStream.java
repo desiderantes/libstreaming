@@ -324,7 +324,9 @@ public class AACStream extends AudioStream {
 		// TODO: use the MediaRecorder.OnInfoListener
 		try {
 			Thread.sleep(2000);
-		} catch (InterruptedException e) {}
+		} catch (final InterruptedException e) {
+			// ignore
+		}
 
 		mMediaRecorder.stop();
 		mMediaRecorder.release();

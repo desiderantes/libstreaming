@@ -349,10 +349,14 @@ public class RtspServer extends Service {
 		public void kill() {
 			try {
 				mServer.close();
-			} catch (IOException e) {}
+			} catch (final IOException e) {
+				Log.w(TAG, e);
+			}
 			try {
 				this.join();
-			} catch (InterruptedException ignore) {}
+			} catch (final InterruptedException ignore) {
+				// ignore
+			}
 		}
 
 	}
@@ -432,7 +436,9 @@ public class RtspServer extends Service {
 
 			try {
 				mClient.close();
-			} catch (IOException ignore) {}
+			} catch (final IOException e) {
+				Log.w(TAG, e);
+			}
 
 			Log.i(TAG, "Client disconnected");
 

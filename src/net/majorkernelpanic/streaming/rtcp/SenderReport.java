@@ -26,6 +26,7 @@ import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import android.os.SystemClock;
+import android.util.Log;
 
 /**
  * Implementation of Sender Report RTCP packets.
@@ -213,7 +214,9 @@ public class SenderReport {
 				try {
 					mOutputStream.write(mTcpHeader);
 					mOutputStream.write(mBuffer, 0, PACKET_LENGTH);
-				} catch (Exception e) {}
+				} catch (Exception e) {
+					Log.w(TAG, e);
+				}
 			}
 		}
 	}

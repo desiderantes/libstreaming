@@ -99,7 +99,9 @@ public class EncoderDebugger {
 				try {
 					SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 					debug(prefs, width, height);
-				} catch (Exception e) {}
+				} catch (final Exception e) {
+					Log.w(TAG, e);
+				}
 			}
 		}).start();
 	}
@@ -537,10 +539,14 @@ public class EncoderDebugger {
 		if (mEncoder != null) {
 			try {
 				mEncoder.stop();
-			} catch (Exception ignore) {}
+			} catch (Exception e) {
+				if (DEBUG) Log.w(TAG, e);
+			}
 			try {
 				mEncoder.release();
-			} catch (Exception ignore) {}
+			} catch (Exception e) {
+				if (DEBUG) Log.w(TAG, e);
+			}
 		}
 	}
 
@@ -593,10 +599,14 @@ public class EncoderDebugger {
 		if (mDecoder != null) {
 			try {
 				mDecoder.stop();
-			} catch (Exception ignore) {}
+			} catch (final Exception e) {
+				Log.w(TAG, e);
+			}
 			try {
 				mDecoder.release();
-			} catch (Exception ignore) {}
+			} catch (final Exception e) {
+				Log.w(TAG, e);
+			}
 		}
 	}	
 

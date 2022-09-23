@@ -322,7 +322,9 @@ public class RtpSocket implements Runnable {
 			try {
 				mOutputStream.write(mTcpHeader);
 				mOutputStream.write(mBuffers[mBufferOut], 0, len);
-			} catch (Exception e) {}
+			} catch (final Exception e) {
+				Log.w(TAG, e);
+			}
 		}
 	}
 

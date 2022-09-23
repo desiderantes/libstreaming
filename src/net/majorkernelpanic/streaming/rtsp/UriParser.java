@@ -40,6 +40,7 @@ import net.majorkernelpanic.streaming.video.VideoQuality;
 import android.content.ContentValues;
 import android.content.Context;
 import android.hardware.Camera.CameraInfo;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -76,7 +77,9 @@ public class UriParser {
 			String value = "";
 			try {
 				value = keyValue[1];
-			}catch(ArrayIndexOutOfBoundsException e){}
+			} catch (final ArrayIndexOutOfBoundsException e){
+				Log.w(TAG, e);
+			}
 
             params.put(
                     URLEncoder.encode(keyValue[0], "UTF-8"), // Name

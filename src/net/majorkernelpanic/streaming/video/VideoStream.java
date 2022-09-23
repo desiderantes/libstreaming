@@ -725,14 +725,19 @@ public abstract class VideoStream extends MediaStream {
 		mCamera.setPreviewCallback(callback);
 
 		try {
-			lock.tryAcquire(2,TimeUnit.SECONDS);
-			Log.d(TAG,"Actual framerate: "+mQuality.framerate);
-			if (mSettings != null) {
-				Editor editor = mSettings.edit();
-				editor.putInt(PREF_PREFIX+"fps"+mRequestedQuality.framerate+","+mCameraImageFormat+","+mRequestedQuality.resX+mRequestedQuality.resY, mQuality.framerate);
-				editor.apply();
+			if (lock.tryAcquire(2, TimeUnit.SECONDS)) {
+				Log.d(TAG,"Actual framerate: "+mQuality.framerate);
+				if (mSettings != null) {
+					Editor editor = mSettings.edit();
+					editor.putInt(PREF_PREFIX+"fps"+mRequestedQuality.framerate+","+mCameraImageFormat+","+mRequestedQuality.resX+mRequestedQuality.resY, mQuality.framerate);
+					editor.apply();
+				}
+			} else {
+				Log.d(TAG, "failed to acquire Semaphore");
 			}
-		} catch (InterruptedException e) {}
+		} catch (final InterruptedException e) {
+			// ignore
+		}
 
 		mCamera.setPreviewCallback(null);
 
