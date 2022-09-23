@@ -132,9 +132,13 @@ public abstract class VideoStream extends MediaStream implements IVideoStream {
 	 * Stops the stream.
 	 */
 	public synchronized void stop() {
-		if (mSurfaceId != 0) {
-			mSource.removeSurface(mSurfaceId);
-			mSurfaceId = 0;
+		final VideoSource source = mSource;
+		mSource = null;
+		if (source != null) {
+			if (mSurfaceId != 0) {
+				source.removeSurface(mSurfaceId);
+				mSurfaceId = 0;
+			}
 		}
 		super.stop();
 	}
