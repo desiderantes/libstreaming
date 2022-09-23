@@ -173,19 +173,19 @@ public class Session {
 	}
 
 	/** You probably don't need to use that directly, use the {@link SessionBuilder}. */
-	void addAudioTrack(AudioStream track) {
+	public void addAudioTrack(AudioStream track) {
 		removeAudioTrack();
 		mAudioStream = track;
 	}
 
 	/** You probably don't need to use that directly, use the {@link SessionBuilder}. */
-	void addVideoTrack(VideoStream track) {
+	public void addVideoTrack(IVideoStream track) {
 		removeVideoTrack();
 		mVideoStream = track;
 	}
 
 	/** You probably don't need to use that directly, use the {@link SessionBuilder}. */
-	void removeAudioTrack() {
+	public void removeAudioTrack() {
 		if (mAudioStream != null) {
 			mAudioStream.stop();
 			mAudioStream = null;
@@ -193,7 +193,7 @@ public class Session {
 	}
 
 	/** You probably don't need to use that directly, use the {@link SessionBuilder}. */
-	void removeVideoTrack() {
+	public void removeVideoTrack() {
 		if (mVideoStream != null) {
 			mVideoStream.stopPreview();
 			mVideoStream = null;
@@ -206,7 +206,7 @@ public class Session {
 	}
 
 	/** Returns the underlying {@link VideoStream} used by the {@link Session}. */
-	public VideoStream getVideoTrack() {
+	public IVideoStream getVideoTrack() {
 		return mVideoStream;
 	}	
 

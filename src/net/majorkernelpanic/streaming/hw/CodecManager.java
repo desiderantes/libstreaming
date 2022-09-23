@@ -42,7 +42,7 @@ public class CodecManager {
 	private static Codec[] sEncoders = null;
 	private static Codec[] sDecoders = null;
 
-	static class Codec {
+	public static class Codec {
 		public Codec(String name, Integer[] formats) {
 			this.name = name;
 			this.formats = formats;
