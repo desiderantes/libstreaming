@@ -19,7 +19,6 @@
 package net.majorkernelpanic.streaming;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import net.majorkernelpanic.streaming.audio.AACStream;
 import net.majorkernelpanic.streaming.audio.AMRNBStream;
 import net.majorkernelpanic.streaming.audio.AudioQuality;

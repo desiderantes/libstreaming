@@ -23,8 +23,6 @@ import java.io.IOException;
 import android.util.Base64;
 import android.util.Log;
 
-import net.majorkernelpanic.streaming.rtcp.SenderReport;
-
 /**
  * Finds SPS & PPS parameters in mp4 file.
  */

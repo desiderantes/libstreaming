@@ -25,11 +25,7 @@ import java.io.OutputStream;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
-import java.nio.channels.IllegalSelectorException;
 import android.os.SystemClock;
-import android.util.Log;
-
-import net.majorkernelpanic.streaming.rtp.RtpSocket;
 
 /**
  * Implementation of Sender Report RTCP packets.

@@ -35,7 +35,6 @@ import net.majorkernelpanic.streaming.MediaStream;
 import net.majorkernelpanic.streaming.Session;
 import net.majorkernelpanic.streaming.SessionBuilder;
 import net.majorkernelpanic.streaming.audio.AudioQuality;
-import net.majorkernelpanic.streaming.video.CodecManager;
 import net.majorkernelpanic.streaming.video.VideoQuality;
 
 import android.content.ContentValues;

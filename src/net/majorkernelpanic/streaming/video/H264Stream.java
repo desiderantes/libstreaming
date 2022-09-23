@@ -20,6 +20,7 @@ package net.majorkernelpanic.streaming.video;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import net.majorkernelpanic.streaming.SessionBuilder;

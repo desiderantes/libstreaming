@@ -19,6 +19,8 @@
 package net.majorkernelpanic.streaming.video;
 
 import java.io.IOException;
+import java.net.InetAddress;
+
 import net.majorkernelpanic.streaming.SessionBuilder;
 import net.majorkernelpanic.streaming.rtp.H263Packetizer;
 import android.graphics.ImageFormat;
