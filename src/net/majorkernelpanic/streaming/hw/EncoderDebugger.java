@@ -80,7 +80,8 @@ public class EncoderDebugger {
 	private final static int NB_ENCODED = 50;
 
 	private int mDecoderColorFormat, mEncoderColorFormat;
-	private String mDecoderName, mEncoderName, mErrorLog;
+	private String mDecoderName, mEncoderName;
+	private final StringBuilder mErrorLog = new StringBuilder();
 	private MediaCodec mEncoder, mDecoder;
 	private int mWidth, mHeight, mSize;
 	private byte[] mSPS, mPPS;
@@ -137,7 +138,7 @@ public class EncoderDebugger {
 
 	/** A log of all the errors that occurred during the test. */
 	public String getErrorLog() {
-		return mErrorLog;
+		return mErrorLog.toString();
 	}
 
 	private EncoderDebugger(SharedPreferences prefs, int width, int height) {
@@ -152,7 +153,7 @@ public class EncoderDebugger {
 		mNV21 = new NV21Convertor();
 		mVideo = new byte[NB_ENCODED][];
 		mDecodedVideo = new byte[NB_DECODED][];
-		mErrorLog = "";
+		mErrorLog.setLength(0);
 		mPPS = null;
 		mSPS = null;		
 	}
@@ -297,7 +298,7 @@ public class EncoderDebugger {
 					String stack = sw.toString();
 					String str = "Encoder "+mEncoderName+" cannot be used with color format "+mEncoderColorFormat;
 					if (VERBOSE) Log.e(TAG, str, e);
-					mErrorLog += str + "\n" + stack;
+					mErrorLog.append(str).append("\n").append(stack);
 					e.printStackTrace();
 				} finally {
 					releaseEncoder();
