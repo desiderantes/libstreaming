@@ -107,6 +107,7 @@ public class VideoQuality implements Cloneable {
 		return quality;
 	}
 
+	@NonNull
 	public String toString() {
 		return resX+"x"+resY+" px, "+framerate+" fps, "+bitrate/1000+" kbps";
 	}
