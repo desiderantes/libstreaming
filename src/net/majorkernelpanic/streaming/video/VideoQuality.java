@@ -25,6 +25,7 @@ import android.hardware.Camera.Size;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 /**
  * A class that represents the quality of a video stream. 
@@ -92,10 +93,10 @@ public class VideoQuality implements Cloneable {
 		return result;
 	}
 
-	public static VideoQuality parseQuality(String str) {
-		VideoQuality quality = DEFAULT_VIDEO_QUALITY.clone();
+	public static VideoQuality parseQuality(@Nullable final String str, @Nullable final VideoQuality defaultQuality) {
+		final VideoQuality quality = defaultQuality != null ? defaultQuality : DEFAULT_VIDEO_QUALITY.clone();
 		if (str != null) {
-			String[] config = str.split("-");
+			final String[] config = str.split("-");
 			try {
 				quality.bitrate = Integer.parseInt(config[0])*1000; // conversion to bit/s
 				quality.framerate = Integer.parseInt(config[1]);

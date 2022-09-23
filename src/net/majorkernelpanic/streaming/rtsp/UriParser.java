@@ -177,25 +177,25 @@ public class UriParser {
 
 				// H.264
 				else if (paramName.equalsIgnoreCase("h264")) {
-					VideoQuality quality = VideoQuality.parseQuality(paramValue);
+					VideoQuality quality = VideoQuality.parseQuality(paramValue, builder.getVideoQuality());
 					builder.setVideoQuality(quality).setVideoEncoder(VIDEO_H264);
 				}
 
 				// H.263
 				else if (paramName.equalsIgnoreCase("h263")) {
-					VideoQuality quality = VideoQuality.parseQuality(paramValue);
+					VideoQuality quality = VideoQuality.parseQuality(paramValue, builder.getVideoQuality());
 					builder.setVideoQuality(quality).setVideoEncoder(VIDEO_H263);
 				}
 
 				// AMR
 				else if (paramName.equalsIgnoreCase("amrnb") || paramName.equalsIgnoreCase("amr")) {
-					AudioQuality quality = AudioQuality.parseQuality(paramValue);
+					AudioQuality quality = AudioQuality.parseQuality(paramValue, builder.getAudioQuality());
 					builder.setAudioQuality(quality).setAudioEncoder(AUDIO_AMRNB);
 				}
 
 				// AAC
 				else if (paramName.equalsIgnoreCase("aac")) {
-					AudioQuality quality = AudioQuality.parseQuality(paramValue);
+					AudioQuality quality = AudioQuality.parseQuality(paramValue, builder.getAudioQuality());
 					builder.setAudioQuality(quality).setAudioEncoder(AUDIO_AAC);
 				}
 

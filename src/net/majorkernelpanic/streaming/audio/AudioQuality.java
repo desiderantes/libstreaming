@@ -21,6 +21,7 @@ package net.majorkernelpanic.streaming.audio;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 /**
  * A class that represents the quality of an audio stream.
@@ -67,10 +68,10 @@ public class AudioQuality implements Cloneable {
 		return result;
 	}
 
-	public static AudioQuality parseQuality(String str) {
-		AudioQuality quality = DEFAULT_AUDIO_QUALITY.clone();
+	public static AudioQuality parseQuality(@Nullable final String str, @Nullable final AudioQuality defaultQuality) {
+		final AudioQuality quality = defaultQuality != null ? defaultQuality : DEFAULT_AUDIO_QUALITY.clone();
 		if (str != null) {
-			String[] config = str.split("-");
+			final String[] config = str.split("-");
 			try {
 				quality.bitRate = Integer.parseInt(config[0])*1000; // conversion to bit/s
 				quality.samplingRate = Integer.parseInt(config[1]);
