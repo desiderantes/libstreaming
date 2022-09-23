@@ -38,7 +38,10 @@ import net.majorkernelpanic.streaming.audio.AudioQuality;
 import net.majorkernelpanic.streaming.video.VideoQuality;
 
 import android.content.ContentValues;
+import android.content.Context;
 import android.hardware.Camera.CameraInfo;
+
+import androidx.annotation.NonNull;
 
 /**
  * This class parses URIs received by the RTSP server and configures a Session accordingly.
@@ -54,12 +57,13 @@ public class UriParser {
 	 * <li>rtsp://xxx.xxx.xxx.xxx:8086?h263&camera=front&flash=on</li>
 	 * <li>rtsp://xxx.xxx.xxx.xxx:8086?h264=200-20-320-240</li>
 	 * <li>rtsp://xxx.xxx.xxx.xxx:8086?aac</li></ul>
+	 * @param context
 	 * @param uri The URI
 	 * @throws IllegalStateException
 	 * @throws IOException
 	 * @return A Session configured according to the URI
 	 */
-	public static Session parse(String uri) throws IllegalStateException, IOException {
+	public static Session parse(@NonNull final Context context, String uri) throws IllegalStateException, IOException {
 		SessionBuilder builder = SessionBuilder.getInstance().clone();
 		byte audioApi = 0, videoApi = 0;
 
@@ -202,7 +206,7 @@ public class UriParser {
 			builder.setAudioEncoder(b.getAudioEncoder());
 		}
 
-		Session session = builder.build();
+		Session session = builder.build(context);
 
 		if (videoApi>0 && session.getVideoTrack() != null) {
 			session.getVideoTrack().setStreamingMethod(videoApi);

@@ -308,7 +308,7 @@ public class RtspServer extends Service {
 	 * @return A proper session
 	 */
 	protected Session handleRequest(String uri, Socket client) throws IllegalStateException, IOException {
-		Session session = UriParser.parse(uri);
+		Session session = UriParser.parse(this, uri);
 		session.setOrigin(client.getLocalAddress().getHostAddress());
 		if (session.getDestination()==null) {
 			session.setDestination(client.getInetAddress().getHostAddress());

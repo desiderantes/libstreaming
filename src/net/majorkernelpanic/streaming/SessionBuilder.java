@@ -32,6 +32,8 @@ import android.content.Context;
 import android.hardware.Camera.CameraInfo;
 import android.preference.PreferenceManager;
 
+import androidx.annotation.NonNull;
+
 /**
  * Call {@link #getInstance()} to get access to the SessionBuilder.
  */
@@ -60,8 +62,7 @@ public class SessionBuilder {
 	// Default configuration
 	private VideoQuality mVideoQuality = VideoQuality.DEFAULT_VIDEO_QUALITY;
 	private AudioQuality mAudioQuality = AudioQuality.DEFAULT_AUDIO_QUALITY;
-	private Context mContext;
-	private int mVideoEncoder = VIDEO_H263; 
+	private int mVideoEncoder = VIDEO_H263;
 	private int mAudioEncoder = AUDIO_AMRNB;
 	private int mCamera = CameraInfo.CAMERA_FACING_BACK;
 	private int mTimeToLive = 64;
@@ -95,10 +96,11 @@ public class SessionBuilder {
 
 	/**
 	 * Creates a new {@link Session}.
+	 * @param context
 	 * @return The new Session
 	 * @throws IOException 
 	 */
-	public Session build() {
+	public Session build(@NonNull final Context context) {
 		Session session;
 
 		session = new Session();
@@ -111,8 +113,7 @@ public class SessionBuilder {
 		case AUDIO_AAC:
 			AACStream stream = new AACStream();
 			session.addAudioTrack(stream);
-			if (mContext!=null) 
-				stream.setPreferences(PreferenceManager.getDefaultSharedPreferences(mContext));
+			stream.setPreferences(PreferenceManager.getDefaultSharedPreferences(context));
 			break;
 		case AUDIO_AMRNB:
 			session.addAudioTrack(new AMRNBStream());
@@ -125,8 +126,7 @@ public class SessionBuilder {
 			break;
 		case VIDEO_H264:
 			H264Stream stream = new H264Stream(mCamera);
-			if (mContext!=null) 
-				stream.setPreferences(PreferenceManager.getDefaultSharedPreferences(mContext));
+			stream.setPreferences(PreferenceManager.getDefaultSharedPreferences(context));
 			session.addVideoTrack(stream);
 			break;
 		}
@@ -148,15 +148,6 @@ public class SessionBuilder {
 
 		return session;
 
-	}
-
-	/** 
-	 * Access to the context is needed for the H264Stream class to store some stuff in the SharedPreferences.
-	 * Note that you should pass the Application context, not the context of an Activity.
-	 **/
-	public SessionBuilder setContext(Context context) {
-		mContext = context;
-		return this;
 	}
 
 	/** Sets the destination of the session. */
@@ -232,11 +223,6 @@ public class SessionBuilder {
 		return this;
 	}
 	
-	/** Returns the context set with {@link #setContext(Context)}*/
-	public Context getContext() {
-		return mContext;	
-	}
-
 	/** Returns the destination ip address set with {@link #setDestination(String)}. */
 	public String getDestination() {
 		return mDestination;
@@ -302,7 +288,6 @@ public class SessionBuilder {
 		.setTimeToLive(mTimeToLive)
 		.setAudioEncoder(mAudioEncoder)
 		.setAudioQuality(mAudioQuality)
-		.setContext(mContext)
 		.setCallback(mCallback);
 	}
 
