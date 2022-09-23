@@ -83,13 +83,9 @@ public class SessionBuilder implements Cloneable {
 	 * Returns a reference to the {@link SessionBuilder}.
 	 * @return The reference to the {@link SessionBuilder}
 	 */
-	public final static SessionBuilder getInstance() {
+	public static final synchronized SessionBuilder getInstance() {
 		if (sInstance == null) {
-			synchronized (SessionBuilder.class) {
-				if (sInstance == null) {
-					SessionBuilder.sInstance = new SessionBuilder();
-				}
-			}
+			SessionBuilder.sInstance = new SessionBuilder();
 		}
 		return sInstance;
 	}	
