@@ -125,7 +125,7 @@ public abstract class VideoStream extends MediaStream {
 	 **/
 	public void switchCamera() throws RuntimeException, IOException {
 		if (Camera.getNumberOfCameras() == 1) throw new IllegalStateException("Phone only has one camera !");
-		boolean streaming = mStreaming;
+		boolean streaming = isStreaming();
 		boolean previewing = mCamera!=null && mCameraOpenedManually; 
 		mCameraId = (mCameraId == CameraInfo.CAMERA_FACING_BACK) ? CameraInfo.CAMERA_FACING_FRONT : CameraInfo.CAMERA_FACING_BACK; 
 		setCamera(mCameraId);
@@ -180,7 +180,7 @@ public abstract class VideoStream extends MediaStream {
 		// If the camera has already been opened, we apply the change immediately
 		if (mCamera != null) {
 
-			if (mStreaming && mMode == MODE_MEDIARECORDER_API) {
+			if (isStreaming() && mMode == MODE_MEDIARECORDER_API) {
 				lockCamera();
 			}
 
@@ -199,7 +199,7 @@ public abstract class VideoStream extends MediaStream {
 					mFlashEnabled = false;
 					throw new RuntimeException("Can't turn the flash on !");
 				} finally {
-					if (mStreaming && mMode == MODE_MEDIARECORDER_API) {
+					if (isStreaming() && mMode == MODE_MEDIARECORDER_API) {
 						unlockCamera();
 					}
 				}
@@ -396,8 +396,6 @@ public abstract class VideoStream extends MediaStream {
 		mPacketizer.setInputStream(is);
 		mPacketizer.start();
 
-		mStreaming = true;
-
 	}
 
 
@@ -485,9 +483,6 @@ public abstract class VideoStream extends MediaStream {
 		// The packetizer encapsulates the bit stream in an RTP stream and send it over the network
 		mPacketizer.setInputStream(new MediaCodecInputStream(mMediaCodec));
 		mPacketizer.start();
-
-		mStreaming = true;
-
 	}
 
 	/**
@@ -522,9 +517,6 @@ public abstract class VideoStream extends MediaStream {
 		// The packetizer encapsulates the bit stream in an RTP stream and send it over the network
 		mPacketizer.setInputStream(new MediaCodecInputStream(mMediaCodec));
 		mPacketizer.start();
-
-		mStreaming = true;
-
 	}
 
 	/**
@@ -622,7 +614,7 @@ public abstract class VideoStream extends MediaStream {
 
 	protected synchronized void destroyCamera() {
 		if (mCamera != null) {
-			if (mStreaming) super.stop();
+			if (isStreaming()) super.stop();
 			lockCamera();
 			mCamera.stopPreview();
 			try {

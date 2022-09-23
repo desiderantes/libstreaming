@@ -120,7 +120,7 @@ public class AACStream extends AudioStream {
 
 	@Override
 	public synchronized void start() throws IllegalStateException, IOException {
-		if (!mStreaming) {
+		if (!isStreaming()) {
 			configure();
 			super.start();
 		}
@@ -241,13 +241,11 @@ public class AACStream extends AudioStream {
 		mPacketizer.setInputStream(inputStream);
 		mPacketizer.start();
 
-		mStreaming = true;
-
 	}
 
 	/** Stops the stream. */
 	public synchronized void stop() {
-		if (mStreaming) {
+		if (isStreaming()) {
 			if (mMode==MODE_MEDIACODEC_API) {
 				Log.d(TAG, "Interrupting threads...");
 				mThread.interrupt();

@@ -115,8 +115,7 @@ public abstract class AudioStream  extends MediaStream {
 		// the mPacketizer encapsulates this stream in an RTP stream and send it over the network
 		mPacketizer.setInputStream(is);
 		mPacketizer.start();
-		mStreaming = true;
-		
+
 	}
 	
 }

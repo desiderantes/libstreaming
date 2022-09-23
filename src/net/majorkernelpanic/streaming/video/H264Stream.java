@@ -89,7 +89,7 @@ public class H264Stream extends VideoStream {
 	 * This will also open the camera and display the preview if {@link #startPreview()} has not already been called.
 	 */
 	public synchronized void start() throws IllegalStateException, IOException {
-		if (!mStreaming) {
+		if (!isStreaming()) {
 			configure();
 			byte[] pps = Base64.decode(mConfig.getB64PPS(), Base64.NO_WRAP);
 			byte[] sps = Base64.decode(mConfig.getB64SPS(), Base64.NO_WRAP);

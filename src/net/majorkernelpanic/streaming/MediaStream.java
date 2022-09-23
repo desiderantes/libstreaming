@@ -74,7 +74,7 @@ public abstract class MediaStream implements Stream {
 	 */
 	protected final static byte sPipeApi;
 	
-	protected boolean mStreaming = false, mConfigured = false;
+	private boolean mStreaming = false, mConfigured = false;
 	protected int mRtpPort = 0, mRtcpPort = 0; 
 	protected byte mChannelIdentifier = 0;
 	protected OutputStream mOutputStream = null;
@@ -244,6 +244,10 @@ public abstract class MediaStream implements Stream {
 		return mStreaming;
 	}
 
+	public boolean isConfigured() {
+		return mConfigured;
+	}
+
 	/**
 	 * Configures the stream with the settings supplied with 
 	 * {@link VideoStream#setVideoQuality(net.majorkernelpanic.streaming.video.VideoQuality)}
@@ -277,6 +281,7 @@ public abstract class MediaStream implements Stream {
 			encodeWithMediaRecorder();
 		}
 
+		mStreaming = true;
 	}
 
 	/** Stops the stream. */
