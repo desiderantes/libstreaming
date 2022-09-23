@@ -41,6 +41,8 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 /**
  * RFC 2326.
  * A basic and asynchronous RTSP client.
@@ -84,7 +86,7 @@ public class RtspClient {
 	private final static int STATE_STOPPED = 0x03;
 	private int mState = 0;
 
-	private class Parameters {
+	private class Parameters implements Cloneable {
 		public String host; 
 		public String username;
 		public String password;
@@ -92,9 +94,15 @@ public class RtspClient {
 		public Session session;
 		public int port;
 		public int transport;
-		
+
+		@NonNull
 		public Parameters clone() {
-			Parameters params = new Parameters();
+			final Parameters params;
+			try {
+				params = (Parameters) super.clone();
+			} catch (final CloneNotSupportedException e) {
+				throw new RuntimeException(e);
+			}
 			params.host = host;
 			params.username = username;
 			params.password = password;

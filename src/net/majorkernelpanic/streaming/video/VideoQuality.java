@@ -24,11 +24,13 @@ import android.hardware.Camera;
 import android.hardware.Camera.Size;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 /**
  * A class that represents the quality of a video stream. 
  * It contains the resolution, the framerate (in fps) and the bitrate (in bps) of the stream.
  */
-public class VideoQuality {
+public class VideoQuality implements Cloneable {
 
 	private static final String TAG = VideoQuality.class.getSimpleName();
 	
@@ -75,8 +77,19 @@ public class VideoQuality {
 				quality.bitrate == this.bitrate);
 	}
 
+	@NonNull
 	public VideoQuality clone() {
-		return new VideoQuality(resX,resY,framerate,bitrate);
+		final VideoQuality result;
+		try {
+			result = (VideoQuality) super.clone();
+		} catch (final CloneNotSupportedException e) {
+			throw new RuntimeException(e);
+		}
+		result.resX = resX;
+		result.resY = resY;
+		result.framerate = framerate;
+		result.bitrate = bitrate;
+		return result;
 	}
 
 	public static VideoQuality parseQuality(String str) {

@@ -18,10 +18,12 @@
 
 package net.majorkernelpanic.streaming.audio;
 
+import androidx.annotation.NonNull;
+
 /**
  * A class that represents the quality of an audio stream.
  */
-public class AudioQuality {
+public class AudioQuality implements Cloneable {
 
 	private static final String TAG = AudioQuality.class.getSimpleName();
 
@@ -50,8 +52,17 @@ public class AudioQuality {
 				quality.bitRate == this.bitRate);
 	}
 
+	@NonNull
 	public AudioQuality clone() {
-		return new AudioQuality(samplingRate, bitRate);
+		final AudioQuality result;
+		try {
+			result = (AudioQuality) super.clone();
+		} catch (final CloneNotSupportedException e) {
+			throw new RuntimeException(e);
+		}
+		result.samplingRate = samplingRate;
+		result.bitRate = bitRate;
+		return result;
 	}
 
 	public static AudioQuality parseQuality(String str) {

@@ -37,7 +37,7 @@ import androidx.annotation.NonNull;
 /**
  * Call {@link #getInstance()} to get access to the SessionBuilder.
  */
-public class SessionBuilder {
+public class SessionBuilder implements Cloneable {
 
 	private static final String TAG = SessionBuilder.class.getSimpleName();
 
@@ -275,8 +275,15 @@ public class SessionBuilder {
 	}
 
 	/** Returns a new {@link SessionBuilder} with the same configuration. */
+	@NonNull
 	public SessionBuilder clone() {
-		return new SessionBuilder()
+		final SessionBuilder result;
+		try {
+			result = (SessionBuilder) super.clone();
+		} catch (final CloneNotSupportedException e) {
+			throw new RuntimeException(e);
+		}
+		return result
 		.setDestination(mDestination)
 		.setOrigin(mOrigin)
 		.setSurfaceView(mSurfaceView)
