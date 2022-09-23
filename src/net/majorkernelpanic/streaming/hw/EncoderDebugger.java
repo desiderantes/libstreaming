@@ -359,7 +359,7 @@ public class EncoderDebugger {
 			editor.putString(PREF_PREFIX+resolution+"sps", mB64SPS);
 		}
 
-		editor.commit();
+		editor.apply();
 	}
 
 	/**

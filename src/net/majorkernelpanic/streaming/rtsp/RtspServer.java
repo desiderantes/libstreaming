@@ -149,7 +149,7 @@ public class RtspServer extends Service {
 	public void setPort(int port) {
 		Editor editor = mSharedPreferences.edit();
 		editor.putString(KEY_PORT, String.valueOf(port));
-		editor.commit();
+		editor.apply();
 	}
 
     /**

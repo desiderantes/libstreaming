@@ -730,7 +730,7 @@ public abstract class VideoStream extends MediaStream {
 			if (mSettings != null) {
 				Editor editor = mSettings.edit();
 				editor.putInt(PREF_PREFIX+"fps"+mRequestedQuality.framerate+","+mCameraImageFormat+","+mRequestedQuality.resX+mRequestedQuality.resY, mQuality.framerate);
-				editor.commit();
+				editor.apply();
 			}
 		} catch (InterruptedException e) {}
 

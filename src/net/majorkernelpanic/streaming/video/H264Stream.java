@@ -266,7 +266,7 @@ public class H264Stream extends VideoStream {
 		if (mSettings != null) {
 			Editor editor = mSettings.edit();
 			editor.putString(key, config.getProfileLevel()+","+config.getB64SPS()+","+config.getB64PPS());
-			editor.commit();
+			editor.apply();
 		}
 
 		return config;

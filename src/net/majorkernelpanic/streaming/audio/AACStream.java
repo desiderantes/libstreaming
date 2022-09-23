@@ -362,7 +362,7 @@ public class AACStream extends AudioStream {
 		if (mSettings!=null) {
 			Editor editor = mSettings.edit();
 			editor.putString(key, mQuality.samplingRate+","+mConfig+","+mChannel);
-			editor.commit();
+			editor.apply();
 		}
 
 		if (!file.delete()) Log.e(TAG,"Temp file could not be erased");

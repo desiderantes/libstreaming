@@ -213,7 +213,7 @@ If you decide to override **RtspServer** change the line above accordingly.
 ```java
 Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
 editor.putString(RtspServer.KEY_PORT, String.valueOf(1234));
-editor.commit();
+editor.apply();
 ```
 
 The port is indeed stored as a String in the preferences, there is a good reason to that. The EditTextPreference object saves its input as a String and cannot easily (one would need to override it) be configured to store it as an Integer.
@@ -240,4 +240,3 @@ context.stopService(new Intent(this,RtspServer.class));
 # Spydroid-ipcamera
 
 Visit [this github page](https://github.com/fyhertz/spydroid-ipcamera) to see how this streaming stack can be used and how it performs.
-
