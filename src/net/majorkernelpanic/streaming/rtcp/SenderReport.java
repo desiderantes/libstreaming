@@ -36,7 +36,8 @@ public class SenderReport {
 	public static final int MTU = 1500;
 
 	private static final int PACKET_LENGTH = 28;
-	
+
+	private final Object mSync = new Object();
 	private MulticastSocket usock;
 	private DatagramPacket upack;
 
@@ -154,7 +155,9 @@ public class SenderReport {
 	 */ 
 	public void setOutputStream(OutputStream os, byte channelIdentifier) {
 		mTransport = TRANSPORT_TCP;
-		mOutputStream = os;
+		synchronized (mSync) {
+			mOutputStream = os;
+		}
 		mTcpHeader[1] = channelIdentifier;
 	}	
 	
@@ -206,7 +209,7 @@ public class SenderReport {
 			upack.setLength(PACKET_LENGTH);
 			usock.send(upack);		
 		} else {
-			synchronized (mOutputStream) {
+			synchronized (mSync) {
 				try {
 					mOutputStream.write(mTcpHeader);
 					mOutputStream.write(mBuffer, 0, PACKET_LENGTH);
