@@ -291,9 +291,9 @@ public class AACStream extends AudioStream {
 
 		if (mSettings!=null && mSettings.contains(key)) {
 			String[] s = mSettings.getString(key, "").split(",");
-			mQuality.samplingRate = Integer.valueOf(s[0]);
-			mConfig = Integer.valueOf(s[1]);
-			mChannel = Integer.valueOf(s[2]);
+			mQuality.samplingRate = Integer.parseInt(s[0]);
+			mConfig = Integer.parseInt(s[1]);
+			mChannel = Integer.parseInt(s[2]);
 			return;
 		}
 
