@@ -278,7 +278,7 @@ public abstract class VideoStream extends MediaStream implements IVideoStream {
 
 		mMediaCodec.configure(mediaFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
 		final Surface surface = mMediaCodec.createInputSurface();
-		mSource.addSurface(surface);
+		mSurfaceId = mSource.addSurface(surface);
 		mMediaCodec.start();
 
 		// The packetizer encapsulates the bit stream in an RTP stream and send it over the network
