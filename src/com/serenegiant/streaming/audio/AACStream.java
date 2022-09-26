@@ -85,7 +85,6 @@ public class AACStream extends AudioStream {
 
 	private String mSessionDescription = null;
 	private int mProfile, mSamplingRateIndex, mChannel, mConfig;
-	private AudioSource mAudioSource = null;
 	private Thread mThread = null;
 
 	public AACStream() {
@@ -169,8 +168,8 @@ public class AACStream extends AudioStream {
 	@SuppressLint({"InlinedApi", "NewApi", "MissingPermission"})
 	protected void encodeWithMediaCodec() throws IOException {
 
-		mAudioSource = createAudioSource();
-		final int bufferSize = mAudioSource.getBufferSize();
+		final AudioSource audioSource = createAudioSource();
+		final int bufferSize = audioSource.getBufferSize();
 
 		((AACLATMPacketizer) mPacketizer).setSamplingRate(mQuality.samplingRate);
 
@@ -183,22 +182,22 @@ public class AACStream extends AudioStream {
 		format.setInteger(MediaFormat.KEY_AAC_PROFILE, MediaCodecInfo.CodecProfileLevel.AACObjectLC);
 		format.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, bufferSize);
 		mMediaCodec.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
-		mAudioSource.start();
+		audioSource.start();
 		mMediaCodec.start();
 
 		final MediaCodecInputStream inputStream = new MediaCodecInputStream(mMediaCodec);
 		final ByteBuffer[] inputBuffers = mMediaCodec.getInputBuffers();
 
-		mThread = new Thread(new Runnable() {
+		final Thread thread = new Thread(new Runnable() {
 			@Override
 			public void run() {
-				int len = 0, bufferIndex = 0;
+				int len, bufferIndex;
 				try {
-					while (!Thread.interrupted()) {
-						bufferIndex = mMediaCodec.dequeueInputBuffer(10000);
+					while (!Thread.interrupted() && isStreaming()) {
+						bufferIndex = mMediaCodec.dequeueInputBuffer(10000/*10ms*/);
 						if (bufferIndex >= 0) {
 							inputBuffers[bufferIndex].clear();
-							len = mAudioSource.read(inputBuffers[bufferIndex], bufferSize);
+							len = audioSource.read(inputBuffers[bufferIndex], bufferSize);
 							if (len == AudioRecord.ERROR_INVALID_OPERATION || len == AudioRecord.ERROR_BAD_VALUE) {
 								Log.e(TAG, "An error occured with the AudioRecord API !");
 							} else {
@@ -207,13 +206,16 @@ public class AACStream extends AudioStream {
 							}
 						}
 					}
-				} catch (RuntimeException e) {
+				} catch (final RuntimeException e) {
 					e.printStackTrace();
+				} finally {
+					audioSource.stop();
+					audioSource.release();
 				}
 			}
 		});
-
-		mThread.start();
+		mThread = thread;
+		thread.start();
 
 		// The packetizer encapsulates this stream in an RTP stream and send it over the network
 		mPacketizer.setInputStream(inputStream);
@@ -228,10 +230,11 @@ public class AACStream extends AudioStream {
 		if (isStreaming()) {
 			if (mMode == MODE_MEDIACODEC_API) {
 				Log.d(TAG, "Interrupting threads...");
-				mThread.interrupt();
-				mAudioSource.stop();
-				mAudioSource.release();
-				mAudioSource = null;
+				final Thread thread = mThread;
+				mThread = null;
+				if (thread != null) {
+					thread.interrupt();
+				}
 			}
 			super.stop();
 		}
