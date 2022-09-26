@@ -85,7 +85,7 @@ public class AACStream extends AudioStream {
 
 	private String mSessionDescription = null;
 	private int mProfile, mSamplingRateIndex, mChannel, mConfig;
-	private AudioSource mAudioRecord = null;
+	private AudioSource mAudioSource = null;
 	private Thread mThread = null;
 
 	public AACStream() {
@@ -169,8 +169,8 @@ public class AACStream extends AudioStream {
 	@SuppressLint({"InlinedApi", "NewApi", "MissingPermission"})
 	protected void encodeWithMediaCodec() throws IOException {
 
-		mAudioRecord = createAudioSource();
-		final int bufferSize = mAudioRecord.getBufferSize();
+		mAudioSource = createAudioSource();
+		final int bufferSize = mAudioSource.getBufferSize();
 
 		((AACLATMPacketizer) mPacketizer).setSamplingRate(mQuality.samplingRate);
 
@@ -183,7 +183,7 @@ public class AACStream extends AudioStream {
 		format.setInteger(MediaFormat.KEY_AAC_PROFILE, MediaCodecInfo.CodecProfileLevel.AACObjectLC);
 		format.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, bufferSize);
 		mMediaCodec.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
-		mAudioRecord.start();
+		mAudioSource.start();
 		mMediaCodec.start();
 
 		final MediaCodecInputStream inputStream = new MediaCodecInputStream(mMediaCodec);
@@ -198,7 +198,7 @@ public class AACStream extends AudioStream {
 						bufferIndex = mMediaCodec.dequeueInputBuffer(10000);
 						if (bufferIndex >= 0) {
 							inputBuffers[bufferIndex].clear();
-							len = mAudioRecord.read(inputBuffers[bufferIndex], bufferSize);
+							len = mAudioSource.read(inputBuffers[bufferIndex], bufferSize);
 							if (len == AudioRecord.ERROR_INVALID_OPERATION || len == AudioRecord.ERROR_BAD_VALUE) {
 								Log.e(TAG, "An error occured with the AudioRecord API !");
 							} else {
@@ -229,9 +229,9 @@ public class AACStream extends AudioStream {
 			if (mMode == MODE_MEDIACODEC_API) {
 				Log.d(TAG, "Interrupting threads...");
 				mThread.interrupt();
-				mAudioRecord.stop();
-				mAudioRecord.release();
-				mAudioRecord = null;
+				mAudioSource.stop();
+				mAudioSource.release();
+				mAudioSource = null;
 			}
 			super.stop();
 		}
