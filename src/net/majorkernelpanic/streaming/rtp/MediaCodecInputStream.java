@@ -41,7 +41,7 @@ import androidx.annotation.NonNull;
  */
 @SuppressLint("NewApi")
 public abstract class MediaCodecInputStream extends InputStream {
-
+	private static final boolean DEBUG = false;	// set false on production
 	private static final String TAG = MediaCodecInputStream.class.getSimpleName();
 
 	public static MediaCodecInputStream newInstance(@NonNull final MediaCodec mediaCodec) {
@@ -124,7 +124,7 @@ public abstract class MediaCodecInputStream extends InputStream {
 							mBuffers = mMediaCodec.getOutputBuffers();
 						} else if (mIndex == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
 							mMediaFormat = mMediaCodec.getOutputFormat();
-							Log.i(TAG, mMediaFormat.toString());
+							if (DEBUG) Log.i(TAG, mMediaFormat.toString());
 						} else if (mIndex != MediaCodec.INFO_TRY_AGAIN_LATER) {
 							Log.e(TAG, "Message: " + mIndex);
 							//return 0;
@@ -176,7 +176,7 @@ public abstract class MediaCodecInputStream extends InputStream {
 							break;
 						} else if (mIndex == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
 							mMediaFormat = mMediaCodec.getOutputFormat();
-							Log.i(TAG, mMediaFormat.toString());
+							if (DEBUG) Log.i(TAG, mMediaFormat.toString());
 						} else if (mIndex != MediaCodec.INFO_TRY_AGAIN_LATER) {
 							Log.e(TAG, "Message: " + mIndex);
 							//return 0;
