@@ -282,7 +282,7 @@ public abstract class VideoStream extends MediaStream implements IVideoStream {
 		mMediaCodec.start();
 
 		// The packetizer encapsulates the bit stream in an RTP stream and send it over the network
-		mPacketizer.setInputStream(new MediaCodecInputStream(mMediaCodec));
+		mPacketizer.setInputStream(MediaCodecInputStream.newInstance(mMediaCodec));
 		mPacketizer.start();
 
 	}
@@ -311,7 +311,7 @@ public abstract class VideoStream extends MediaStream implements IVideoStream {
 		mMediaCodec.start();
 
 		// The packetizer encapsulates the bit stream in an RTP stream and send it over the network
-		mPacketizer.setInputStream(new MediaCodecInputStream(mMediaCodec));
+		mPacketizer.setInputStream(MediaCodecInputStream.newInstance(mMediaCodec));
 		mPacketizer.start();
 
 	}

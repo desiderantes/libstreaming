@@ -501,7 +501,7 @@ public abstract class VideoStream extends MediaStream implements ILocalVideoStre
 		mCamera.setPreviewCallbackWithBuffer(callback);
 
 		// The packetizer encapsulates the bit stream in an RTP stream and send it over the network
-		mPacketizer.setInputStream(new MediaCodecInputStream(mMediaCodec));
+		mPacketizer.setInputStream(MediaCodecInputStream.newInstance(mMediaCodec));
 		mPacketizer.start();
 	}
 
@@ -535,7 +535,7 @@ public abstract class VideoStream extends MediaStream implements ILocalVideoStre
 		mMediaCodec.start();
 
 		// The packetizer encapsulates the bit stream in an RTP stream and send it over the network
-		mPacketizer.setInputStream(new MediaCodecInputStream(mMediaCodec));
+		mPacketizer.setInputStream(MediaCodecInputStream.newInstance(mMediaCodec));
 		mPacketizer.start();
 	}
 

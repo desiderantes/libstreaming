@@ -208,7 +208,7 @@ public class AACStream extends AudioStream {
 		mAudioRecord.startRecording();
 		mMediaCodec.start();
 
-		final MediaCodecInputStream inputStream = new MediaCodecInputStream(mMediaCodec);
+		final MediaCodecInputStream inputStream = MediaCodecInputStream.newInstance(mMediaCodec);
 		final ByteBuffer[] inputBuffers = mMediaCodec.getInputBuffers();
 
 		mThread = new Thread(new Runnable() {
