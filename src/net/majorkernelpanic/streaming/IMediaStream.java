@@ -57,7 +57,7 @@ public interface IMediaStream extends Stream {
 	 * Returns the streaming method in use, call this after
 	 * {@link #configure()} to get an accurate response.
 	 */
-	public byte getStreamingMethod();
+	public int getStreamingMethod();
 	/**
 	 * Returns the packetizer associated with the {@link MediaStream}.
 	 * @return The packetizer

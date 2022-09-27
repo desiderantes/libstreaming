@@ -52,9 +52,8 @@ public class H264Stream extends VideoStream {
 	 * Uses CAMERA_FACING_BACK by default.
 	 */
 	public H264Stream() {
-		super();
+		super(MediaRecorder.VideoEncoder.H264);
 		mMimeType = "video/avc";
-		mVideoEncoder = MediaRecorder.VideoEncoder.H264;
 		mPacketizer = new H264Packetizer();
 		mMode = MODE_MEDIACODEC_API_2;
 	}

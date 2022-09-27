@@ -28,6 +28,8 @@ import android.media.MediaRecorder;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 /** 
  * Don't use this class directly.
  */
@@ -38,7 +40,9 @@ public abstract class AudioStream  extends MediaStream implements IAudioStream {
 	protected int mAudioSource;
 	protected int mOutputFormat;
 	protected int mAudioEncoder;
+	@NonNull
 	protected AudioQuality mRequestedQuality = AudioQuality.DEFAULT_AUDIO_QUALITY.clone();
+	@NonNull
 	protected AudioQuality mQuality = mRequestedQuality.clone();
 	
 	public AudioStream() {
@@ -50,13 +54,14 @@ public abstract class AudioStream  extends MediaStream implements IAudioStream {
 	}
 
 	@Override
-	public void setAudioQuality(AudioQuality quality) {
+	public void setAudioQuality(@NonNull final AudioQuality quality) {
 		mRequestedQuality = quality;
 	}
 	
 	/** 
 	 * Returns the quality of the stream.  
 	 */
+	@NonNull
 	@Override
 	public AudioQuality getAudioQuality() {
 		return mQuality;

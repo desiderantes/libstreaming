@@ -19,10 +19,13 @@ package net.majorkernelpanic.streaming.audio;
 
 import net.majorkernelpanic.streaming.IMediaStream;
 
+import androidx.annotation.NonNull;
+
 public interface IAudioStream extends IMediaStream {
-	public void setAudioQuality(AudioQuality quality);
+	public void setAudioQuality(@NonNull final AudioQuality quality);
 	/**
 	 * Returns the quality of the stream.
 	 */
+	@NonNull
 	public AudioQuality getAudioQuality();
 }

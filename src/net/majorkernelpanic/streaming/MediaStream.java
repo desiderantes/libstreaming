@@ -45,10 +45,10 @@ public abstract class MediaStream implements IMediaStream {
 	private static final String TAG = MediaStream.class.getSimpleName();
 	
 	/** A LocalSocket will be used to feed the MediaRecorder object */
-	public static final byte PIPE_API_LS = 0x01;
+	protected static final byte PIPE_API_LS = 0x01;
 	
 	/** A ParcelFileDescriptor will be used to feed the MediaRecorder object */
-	public static final byte PIPE_API_PFD = 0x02;
+	protected static final byte PIPE_API_PFD = 0x02;
 	
 	/** Prefix that will be used for all shared preferences saved by libstreaming */
 	protected static final String PREF_PREFIX = "libstreaming-";
@@ -56,8 +56,8 @@ public abstract class MediaStream implements IMediaStream {
 	/** The packetizer that will read the output of the camera and send RTP packets over the networked. */
 	protected AbstractPacketizer mPacketizer = null;
 
-	protected static byte sSuggestedMode = MODE_MEDIARECORDER_API;
-	protected byte mMode, mRequestedMode;
+	protected static int sSuggestedMode = MODE_MEDIARECORDER_API;
+	protected int mMode, mRequestedMode;
 
 	/** 
 	 * Starting lollipop the LocalSocket API cannot be used to feed a MediaRecorder object. 
@@ -209,7 +209,7 @@ public abstract class MediaStream implements IMediaStream {
 	 * Returns the streaming method in use, call this after 
 	 * {@link #configure()} to get an accurate response. 
 	 */
-	public byte getStreamingMethod() {
+	public int getStreamingMethod() {
 		return mMode;
 	}		
 	

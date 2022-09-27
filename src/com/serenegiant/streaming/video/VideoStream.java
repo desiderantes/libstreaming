@@ -56,12 +56,12 @@ public abstract class VideoStream extends MediaStream implements IVideoStream {
 	protected VideoQuality mQuality = mRequestedQuality.clone();
 	@Nullable
 	private VideoSource.Factory mFactory = null;
-	protected VideoSource mSource = null;
-	protected int mSurfaceId;
-	protected int mVideoEncoder = 0;
+	private VideoSource mSource = null;
+	private int mSurfaceId;
+	private final int mVideoEncoder;
 	protected int mRequestedOrientation = 0, mOrientation = 0;
 
-	protected boolean mPreviewStarted = false;
+	private boolean mPreviewStarted = false;
 
 	protected String mMimeType;
 	protected String mEncoderName;
@@ -72,8 +72,9 @@ public abstract class VideoStream extends MediaStream implements IVideoStream {
 	 * Don't use this class directly.
 	 * Uses CAMERA_FACING_BACK by default.
 	 */
-	public VideoStream() {
+	public VideoStream(final int videoEncoder) {
 		super();
+		mVideoEncoder = videoEncoder;
 	}
 
 	/**
