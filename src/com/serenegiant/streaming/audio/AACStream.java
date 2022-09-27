@@ -29,6 +29,8 @@ import android.os.Build;
 import android.service.textservice.SpellCheckerService.Session;
 import android.util.Log;
 
+import com.serenegiant.system.BuildCheck;
+
 import net.majorkernelpanic.streaming.SessionBuilder;
 import net.majorkernelpanic.streaming.audio.AudioQuality;
 import net.majorkernelpanic.streaming.rtp.AACADTSPacketizer;
@@ -151,7 +153,7 @@ public class AACStream extends AudioStream {
 			mChannel = 1;
 			mConfig = (mProfile & 0x1F) << 11 | (mSamplingRateIndex & 0x0F) << 7 | (mChannel & 0x0F) << 3;
 
-			mSessionDescription = "m=audio " + String.valueOf(getDestinationPorts()[0]) + " RTP/AVP 96\r\n" +
+			mSessionDescription = "m=audio " + getDestinationPorts()[0] + " RTP/AVP 96\r\n" +
 				"a=rtpmap:96 mpeg4-generic/" + mQuality.samplingRate + "\r\n" +
 				"a=fmtp:96 streamtype=5; profile-level-id=15; mode=AAC-hbr; config=" + Integer.toHexString(mConfig) + "; SizeLength=13; IndexLength=3; IndexDeltaLength=3;\r\n";
 
@@ -160,13 +162,22 @@ public class AACStream extends AudioStream {
 	}
 
 	@Override
-	protected void encodeWithMediaRecorder() throws IOException {
+	protected void encodeWithMediaRecorder() {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	@SuppressLint({"InlinedApi", "NewApi", "MissingPermission"})
 	protected void encodeWithMediaCodec() throws IOException {
+		if (BuildCheck.isAPI21()) {
+			encodeWithMediaCodecAPI21();
+		} else {
+			encodeWithMediaCodecOld();
+		}
+	}
+
+	@SuppressWarnings("deprecation")
+	@SuppressLint({"InlinedApi", "NewApi", "MissingPermission"})
+	private void encodeWithMediaCodecOld() throws IOException {
 
 		final AudioSource audioSource = createAudioSource();
 		final int bufferSize = audioSource.getBufferSize();
@@ -199,7 +210,65 @@ public class AACStream extends AudioStream {
 							inputBuffers[bufferIndex].clear();
 							len = audioSource.read(inputBuffers[bufferIndex], bufferSize);
 							if (len == AudioRecord.ERROR_INVALID_OPERATION || len == AudioRecord.ERROR_BAD_VALUE) {
-								Log.e(TAG, "An error occured with the AudioRecord API !");
+								Log.e(TAG, "An error occurred with the AudioRecord API !");
+							} else {
+								//Log.v(TAG,"Pushing raw audio to the decoder: len="+len+" bs: "+inputBuffers[bufferIndex].capacity());
+								mMediaCodec.queueInputBuffer(bufferIndex, 0, len, System.nanoTime() / 1000, 0);
+							}
+						}
+					}
+				} catch (final RuntimeException e) {
+					e.printStackTrace();
+				} finally {
+					audioSource.stop();
+					audioSource.release();
+				}
+			}
+		});
+		mThread = thread;
+		thread.start();
+
+		// The packetizer encapsulates this stream in an RTP stream and send it over the network
+		mPacketizer.setInputStream(inputStream);
+		mPacketizer.start();
+
+	}
+
+	@SuppressLint({"InlinedApi", "NewApi", "MissingPermission"})
+	private void encodeWithMediaCodecAPI21() throws IOException {
+
+		final AudioSource audioSource = createAudioSource();
+		final int bufferSize = audioSource.getBufferSize();
+
+		((AACLATMPacketizer) mPacketizer).setSamplingRate(mQuality.samplingRate);
+
+		mMediaCodec = MediaCodec.createEncoderByType("audio/mp4a-latm");
+		final MediaFormat format = new MediaFormat();
+		format.setString(MediaFormat.KEY_MIME, "audio/mp4a-latm");
+		format.setInteger(MediaFormat.KEY_BIT_RATE, mQuality.bitRate);
+		format.setInteger(MediaFormat.KEY_CHANNEL_COUNT, 1);
+		format.setInteger(MediaFormat.KEY_SAMPLE_RATE, mQuality.samplingRate);
+		format.setInteger(MediaFormat.KEY_AAC_PROFILE, MediaCodecInfo.CodecProfileLevel.AACObjectLC);
+		format.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, bufferSize);
+		mMediaCodec.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
+		audioSource.start();
+		mMediaCodec.start();
+
+		final MediaCodecInputStream inputStream = MediaCodecInputStream.newInstance(mMediaCodec);
+
+		final Thread thread = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				int len, bufferIndex;
+				try {
+					while (!Thread.interrupted() && isStreaming()) {
+						bufferIndex = mMediaCodec.dequeueInputBuffer(10000/*10ms*/);
+						if (bufferIndex >= 0) {
+							final ByteBuffer inputBuffer = mMediaCodec.getInputBuffer(bufferIndex);
+							inputBuffer.clear();
+							len = audioSource.read(inputBuffer, bufferSize);
+							if (len == AudioRecord.ERROR_INVALID_OPERATION || len == AudioRecord.ERROR_BAD_VALUE) {
+								Log.e(TAG, "An error occurred with the AudioRecord API !");
 							} else {
 								//Log.v(TAG,"Pushing raw audio to the decoder: len="+len+" bs: "+inputBuffers[bufferIndex].capacity());
 								mMediaCodec.queueInputBuffer(bufferIndex, 0, len, System.nanoTime() / 1000, 0);
