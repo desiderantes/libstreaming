@@ -49,7 +49,7 @@ import java.nio.ByteBuffer;
  * Call {@link #stop()} to stop the stream.
  */
 public class AACStream extends AudioStream {
-
+	private static final boolean DEBUG = false;	// set false on production
 	private static final String TAG = AACStream.class.getSimpleName();
 
 	/**
@@ -275,8 +275,8 @@ public class AACStream extends AudioStream {
 							}
 						}
 					}
-				} catch (final RuntimeException e) {
-					e.printStackTrace();
+				} catch (final Exception e) {
+					if (isStreaming() || DEBUG) Log.w(TAG, e);
 				} finally {
 					audioSource.stop();
 					audioSource.release();
