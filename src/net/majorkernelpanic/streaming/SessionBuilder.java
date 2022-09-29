@@ -66,6 +66,9 @@ public class SessionBuilder implements Cloneable {
 	/** Can be used with {@link #setAudioEncoder}. */
 	public final static int AUDIO_AAC = 5;
 
+	public static final int DESTINATION_PORT_VIDEO = 5006;
+	public static final int DESTINATION_PORT_AUDIO = 5004;
+
 	// Default configuration
 	@NonNull
 	private VideoQuality mVideoQuality = VideoQuality.DEFAULT_VIDEO_QUALITY;
@@ -143,13 +146,13 @@ public class SessionBuilder implements Cloneable {
 			if (video != null) {
 				video.setVideoQuality(builder.getVideoQuality());
 				video.setOrientation(builder.getOrientation());
-				video.setDestinationPorts(5006);
+				video.setDestinationPorts(DESTINATION_PORT_VIDEO);
 			}
 
 			final IAudioStream audio = session.getAudioTrack();
 			if (audio != null) {
 				audio.setAudioQuality(builder.getAudioQuality());
-				audio.setDestinationPorts(5004);
+				audio.setDestinationPorts(DESTINATION_PORT_AUDIO);
 			}
 
 			return session;
