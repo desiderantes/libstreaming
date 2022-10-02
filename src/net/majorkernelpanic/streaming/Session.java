@@ -22,6 +22,9 @@ package net.majorkernelpanic.streaming;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.security.SecureRandom;
+import java.util.Locale;
+
 import net.majorkernelpanic.streaming.audio.AudioQuality;
 import net.majorkernelpanic.streaming.audio.AudioStream;
 import net.majorkernelpanic.streaming.audio.IAudioStream;
@@ -111,6 +114,8 @@ public class Session {
 		public Session createSession(@NonNull final Context context, @NonNull final SessionBuilder builder);
 	}
 
+	@NonNull
+	private final String mId;
 	private String mOrigin;
 	private String mDestination;
 	private int mTimeToLive = 64;
@@ -123,12 +128,15 @@ public class Session {
 	private Handler mMainHandler;
 
 	private Handler mHandler;
+	@NonNull
+	private static final SecureRandom sRandom = new SecureRandom();
 
 	/** 
 	 * Creates a streaming session that can be customized by adding tracks.
 	 */
 	public Session() {
-		long uptime = System.currentTimeMillis();
+		mId = String.format(Locale.US, "%014x", sRandom.nextLong()); // "1185d20035702c";
+		final long uptime = System.currentTimeMillis();
 
 		HandlerThread thread = new HandlerThread("net.majorkernelpanic.streaming.Session");
 		thread.start();
@@ -183,6 +191,11 @@ public class Session {
 		/** Called when the stream of the session have been stopped. */
 		public void onSessionStopped();
 
+	}
+
+	@NonNull
+	public String getId() {
+		return mId;
 	}
 
 	/** You probably don't need to use that directly, use the {@link SessionBuilder}. */
