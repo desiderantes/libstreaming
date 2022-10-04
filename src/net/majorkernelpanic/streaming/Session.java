@@ -775,4 +775,21 @@ public class Session {
 			return mVideoStream;
 	}
 
+	@NonNull
+	@Override
+	public String toString() {
+		return "Session{" +
+			"mId='" + mId + '\'' +
+			", mOrigin='" + mOrigin + '\'' +
+			", mDestination='" + mDestination + '\'' +
+			", mTimeToLive=" + mTimeToLive +
+			", mTimestamp=" + mTimestamp +
+			", mAudioStream=" + mAudioStream +
+			", mVideoStream=" + mVideoStream +
+			", mCallback=" + mCallback +
+			", mMainHandler=" + mMainHandler +
+			", mHandler=" + mHandler +
+			", mUpdateBitrate=" + mUpdateBitrate +
+			'}';
+	}
 }

@@ -378,4 +378,26 @@ public class SessionBuilder implements Cloneable {
 		.setSessionFactory(mSessionFactory);
 	}
 
+	@NonNull
+	@Override
+	public String toString() {
+		return "SessionBuilder{" +
+			"mVideoQuality=" + mVideoQuality +
+			", mAudioQuality=" + mAudioQuality +
+			", mSettings=" + mSettings +
+			", mVideoFactory=" + mVideoFactory +
+			", mAudioFactory=" + mAudioFactory +
+			", mVideoEncoder=" + mVideoEncoder +
+			", mAudioEncoder=" + mAudioEncoder +
+			", mCamera=" + mCamera +
+			", mTimeToLive=" + mTimeToLive +
+			", mOrientation=" + mOrientation +
+			", mFlash=" + mFlash +
+			", mSurfaceView=" + mSurfaceView +
+			", mOrigin='" + mOrigin + '\'' +
+			", mDestination='" + mDestination + '\'' +
+			", mCallback=" + mCallback +
+			", mSessionFactory=" + mSessionFactory +
+			'}';
+	}
 }

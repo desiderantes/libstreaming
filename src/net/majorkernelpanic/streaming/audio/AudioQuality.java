@@ -69,6 +69,15 @@ public class AudioQuality implements Cloneable {
 		return result;
 	}
 
+	@NonNull
+	@Override
+	public String toString() {
+		return "AudioQuality{" +
+			"samplingRate=" + samplingRate +
+			", bitRate=" + bitRate +
+			'}';
+	}
+
 	public static AudioQuality parseQuality(@Nullable final String str, @Nullable final AudioQuality defaultQuality) {
 		final AudioQuality quality = defaultQuality != null ? defaultQuality : DEFAULT_AUDIO_QUALITY.clone();
 		if (!TextUtils.isEmpty(str)) {
