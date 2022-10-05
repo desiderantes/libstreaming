@@ -33,7 +33,7 @@ import android.util.Log;
  *   
  */
 public class H264Packetizer extends AbstractPacketizer implements Runnable {
-
+	private static final boolean DEBUG = false;	// set false on production
 	private static final String TAG = H264Packetizer.class.getSimpleName();
 
 	private Thread t = null;
@@ -131,7 +131,7 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
 
 			}
 		} catch (final IOException e) {
-			Log.w(TAG, e);
+			if (DEBUG) Log.w(TAG, e);
 		} catch (final InterruptedException e) {
 			// ignore
 		}
