@@ -267,13 +267,18 @@ public abstract class MediaStream implements IMediaStream {
 
 		mPacketizer.setTimeToLive(mTTL);
 		
-		if (mMode != MODE_MEDIARECORDER_API) {
-			encodeWithMediaCodec();
-		} else {
-			encodeWithMediaRecorder();
+		mStreaming = true;
+		try {
+			if (mMode != MODE_MEDIARECORDER_API) {
+				encodeWithMediaCodec();
+			} else {
+				encodeWithMediaRecorder();
+			}
+		} catch (final Exception e) {
+			mStreaming = false;
+			throw e;
 		}
 
-		mStreaming = true;
 	}
 
 	/** Stops the stream. */
