@@ -177,7 +177,7 @@ public abstract class MediaCodecInputStream extends InputStream {
 							break;
 						} else if (mIndex == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
 							mMediaFormat = mMediaCodec.getOutputFormat();
-							if (DEBUG) Log.i(TAG, mMediaFormat.toString());
+							if (DEBUG) MediaCodecUtils.dump(mMediaFormat);
 						} else if (mIndex != MediaCodec.INFO_TRY_AGAIN_LATER) {
 							Log.e(TAG, "Message: " + mIndex);
 							//return 0;
