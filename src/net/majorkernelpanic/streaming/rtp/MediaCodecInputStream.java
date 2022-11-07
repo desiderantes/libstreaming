@@ -26,6 +26,7 @@ import android.media.MediaFormat;
 import android.os.Build;
 import android.util.Log;
 
+import com.serenegiant.media.MediaCodecUtils;
 import com.serenegiant.system.BuildCheck;
 
 import java.io.IOException;
@@ -124,7 +125,7 @@ public abstract class MediaCodecInputStream extends InputStream {
 							mBuffers = mMediaCodec.getOutputBuffers();
 						} else if (mIndex == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
 							mMediaFormat = mMediaCodec.getOutputFormat();
-							if (DEBUG) Log.i(TAG, mMediaFormat.toString());
+							if (DEBUG) MediaCodecUtils.dump(mMediaFormat);
 						} else if (mIndex != MediaCodec.INFO_TRY_AGAIN_LATER) {
 							Log.e(TAG, "Message: " + mIndex);
 							//return 0;
