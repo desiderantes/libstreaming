@@ -48,12 +48,12 @@ public class RtpSocket implements Runnable {
 	public static final int RTP_HEADER_LENGTH = 12;
 	public static final int MTU = 1300;
 
-	private MulticastSocket mSocket;
-	private DatagramPacket[] mPackets;
-	private byte[][] mBuffers;
+	private final MulticastSocket mSocket;
+	private final DatagramPacket[] mPackets;
+	private final byte[][] mBuffers;
 	private long[] mTimestamps;
 
-	private SenderReport mReport;
+	private final SenderReport mReport;
 	
 	private Semaphore mBufferRequested, mBufferCommitted;
 	private Thread mThread;
@@ -63,19 +63,20 @@ public class RtpSocket implements Runnable {
 	private long mClock = 0;
 	private long mOldTimestamp = 0;
 	private int mSsrc, mSeq = 0, mPort = -1;
-	private int mBufferCount, mBufferIn, mBufferOut;
+	private final int mBufferCount;
+	private int mBufferIn;
+	private int mBufferOut;
 	private int mCount = 0;
-	private byte mTcpHeader[];
+	private final byte[] mTcpHeader;
 	protected OutputStream mOutputStream = null;
 	
-	private AverageBitrate mAverageBitrate;
+	private final AverageBitrate mAverageBitrate;
 
 	/**
 	 * This RTP socket implements a buffering mechanism relying on a FIFO of buffers and a Thread.
 	 * @throws IOException
 	 */
 	public RtpSocket() {
-		
 		mCacheSize = 0;
 		mBufferCount = 300; // TODO: readjust that when the FIFO is full 
 		mBuffers = new byte[mBufferCount][];
