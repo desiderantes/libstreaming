@@ -260,7 +260,7 @@ public class RtpSocket implements Runnable {
 	 **/
 	public void updateTimestamp(long timestamp) {
 		mTimestamps[mBufferIn] = timestamp;
-		setLong(mBuffers[mBufferIn], (timestamp/100L)*(mClock/1000L)/10000L, 4, 8);
+		setLong(mBuffers[mBufferIn], getRtpTimestamp(timestamp, mClock), 4, 8);
 	}
 
 	/** Sets the marker in the RTP packet. */
@@ -295,7 +295,7 @@ public class RtpSocket implements Runnable {
 						delta = 0;
 					}
 				}
-				mReport.update(mPackets[mBufferOut].getLength(), (mTimestamps[mBufferOut]/100L)*(mClock/1000L)/10000L);
+				mReport.update(mPackets[mBufferOut].getLength(), getRtpTimestamp(mTimestamps[mBufferOut], mClock));
 				mOldTimestamp = mTimestamps[mBufferOut];
 				if (mCount++>30) {
 					if (mTransport == TRANSPORT_UDP) {
@@ -334,6 +334,10 @@ public class RtpSocket implements Runnable {
 			buffer[end] = (byte) (n % 256);
 			n >>= 8;
 		}
+	}
+
+	private static long getRtpTimestamp(final long timestamp, final long clock) {
+		return (timestamp / 100L) * (clock / 1000L) / 10000L;
 	}
 
 	/** 
