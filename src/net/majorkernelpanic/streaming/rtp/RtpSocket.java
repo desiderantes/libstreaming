@@ -329,7 +329,7 @@ public class RtpSocket implements Runnable {
 		}
 	}
 
-	private void setLong(byte[] buffer, long n, int begin, int end) {
+	private static void setLong(byte[] buffer, long n, int begin, int end) {
 		for (end--; end >= begin; end--) {
 			buffer[end] = (byte) (n % 256);
 			n >>= 8;
