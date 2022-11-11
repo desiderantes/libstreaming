@@ -38,8 +38,8 @@ public class AACLATMPacketizer extends AbstractPacketizer implements Runnable {
 
 	private Thread t;
 
-	public AACLATMPacketizer() {
-		super();
+	public AACLATMPacketizer(final long startTimeNs) {
+		super(startTimeNs);
 		socket.setCacheSize(0);
 	}
 

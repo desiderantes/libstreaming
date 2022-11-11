@@ -45,7 +45,8 @@ public abstract class AudioStream  extends MediaStream implements IAudioStream {
 	@NonNull
 	protected AudioQuality mQuality = mRequestedQuality.clone();
 	
-	public AudioStream() {
+	public AudioStream(final long startTimeNs) {
+		super(startTimeNs);
 		setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
 	}
 	

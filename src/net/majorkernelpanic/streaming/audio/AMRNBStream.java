@@ -38,10 +38,10 @@ public class AMRNBStream extends AudioStream {
 
 	private static final String TAG = AMRNBStream.class.getSimpleName();
 
-	public AMRNBStream() {
-		super();
+	public AMRNBStream(final long startTimeNs) {
+		super(startTimeNs);
 
-		mPacketizer = new AMRNBPacketizer();
+		mPacketizer = new AMRNBPacketizer(startTimeNs);
 
 		setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
 		

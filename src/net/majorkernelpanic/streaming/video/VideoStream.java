@@ -90,8 +90,8 @@ public abstract class VideoStream extends MediaStream implements ILocalVideoStre
 	 * Don't use this class directly.
 	 * Uses CAMERA_FACING_BACK by default.
 	 */
-	public VideoStream() {
-		this(CameraInfo.CAMERA_FACING_BACK);
+	public VideoStream(final long startTimeNs) {
+		this(startTimeNs, CameraInfo.CAMERA_FACING_BACK);
 	}	
 
 	/** 
@@ -99,8 +99,8 @@ public abstract class VideoStream extends MediaStream implements ILocalVideoStre
 	 * @param camera Can be either CameraInfo.CAMERA_FACING_BACK or CameraInfo.CAMERA_FACING_FRONT
 	 */
 	@SuppressLint("InlinedApi")
-	public VideoStream(int camera) {
-		super();
+	public VideoStream(final long startTimeNs, int camera) {
+		super(startTimeNs);
 		setCamera(camera);
 	}
 

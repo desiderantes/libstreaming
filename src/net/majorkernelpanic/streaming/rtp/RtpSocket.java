@@ -48,10 +48,11 @@ public class RtpSocket implements Runnable {
 	public static final int RTP_HEADER_LENGTH = 12;
 	public static final int MTU = 1300;
 
+	private final long mStartTimeNs;
 	private final MulticastSocket mSocket;
 	private final DatagramPacket[] mPackets;
 	private final byte[][] mBuffers;
-	private long[] mTimestamps;
+	private long[] mTimestampsNs;
 
 	private final SenderReport mReport;
 	
@@ -76,7 +77,8 @@ public class RtpSocket implements Runnable {
 	 * This RTP socket implements a buffering mechanism relying on a FIFO of buffers and a Thread.
 	 * @throws IOException
 	 */
-	public RtpSocket() {
+	public RtpSocket(final long startTimeNs) {
+		mStartTimeNs = startTimeNs;
 		mCacheSize = 0;
 		mBufferCount = 300; // TODO: readjust that when the FIFO is full 
 		mBuffers = new byte[mBufferCount][];
@@ -123,7 +125,7 @@ public class RtpSocket implements Runnable {
 		mCount = 0;
 		mBufferIn = 0;
 		mBufferOut = 0;
-		mTimestamps = new long[mBufferCount];
+		mTimestampsNs = new long[mBufferCount];
 		mBufferRequested = new Semaphore(mBufferCount);
 		mBufferCommitted = new Semaphore(0);
 		mReport.reset();
@@ -256,11 +258,12 @@ public class RtpSocket implements Runnable {
 
 	/** 
 	 * Overwrites the timestamp in the packet.
-	 * @param timestamp The new timestamp in ns.
+	 * @param timestampNs The new timestamp in ns.
 	 **/
-	public void updateTimestamp(long timestamp) {
-		mTimestamps[mBufferIn] = timestamp;
-		setLong(mBuffers[mBufferIn], getRtpTimestamp(timestamp, mClock), 4, 8);
+	public void updateTimestamp(final long timestampNs) {
+		final long ts = (timestampNs > mStartTimeNs) ? timestampNs - mStartTimeNs : timestampNs;
+		mTimestampsNs[mBufferIn] = ts;
+		setLong(mBuffers[mBufferIn], getRtpTimestamp(ts, mClock), 4, 8);
 	}
 
 	/** Sets the marker in the RTP packet. */
@@ -280,23 +283,23 @@ public class RtpSocket implements Runnable {
 				if (mOldTimestamp != 0) {
 					// We use our knowledge of the clock rate of the stream and the difference between two timestamps to
 					// compute the time lapse that the packet represents.
-					if ((mTimestamps[mBufferOut]-mOldTimestamp)>0) {
-						stats.push(mTimestamps[mBufferOut]-mOldTimestamp);
+					if ((mTimestampsNs[mBufferOut]-mOldTimestamp)>0) {
+						stats.push(mTimestampsNs[mBufferOut]-mOldTimestamp);
 						long d = stats.average()/1000000;
 						//Log.d(TAG,"delay: "+d+" d: "+(mTimestamps[mBufferOut]-mOldTimestamp)/1000000);
 						// We ensure that packets are sent at a constant and suitable rate no matter how the RtpSocket is used.
 						if (mCacheSize>0) Thread.sleep(d);
-					} else if ((mTimestamps[mBufferOut]-mOldTimestamp)<0) {
-						Log.e(TAG, "TS: "+mTimestamps[mBufferOut]+" OLD: "+mOldTimestamp);
+					} else if ((mTimestampsNs[mBufferOut]-mOldTimestamp)<0) {
+						Log.e(TAG, "TS: "+ mTimestampsNs[mBufferOut]+" OLD: "+mOldTimestamp);
 					}
-					delta += mTimestamps[mBufferOut]-mOldTimestamp;
+					delta += mTimestampsNs[mBufferOut]-mOldTimestamp;
 					if (delta>500000000 || delta<0) {
 						//Log.d(TAG,"permits: "+mBufferCommitted.availablePermits());
 						delta = 0;
 					}
 				}
-				mReport.update(mPackets[mBufferOut].getLength(), getRtpTimestamp(mTimestamps[mBufferOut], mClock));
-				mOldTimestamp = mTimestamps[mBufferOut];
+				mReport.update(mPackets[mBufferOut].getLength(), getRtpTimestamp(mTimestampsNs[mBufferOut], mClock));
+				mOldTimestamp = mTimestampsNs[mBufferOut];
 				if (mCount++>30) {
 					if (mTransport == TRANSPORT_UDP) {
 						mSocket.send(mPackets[mBufferOut]);
@@ -336,8 +339,8 @@ public class RtpSocket implements Runnable {
 		}
 	}
 
-	private static long getRtpTimestamp(final long timestamp, final long clock) {
-		return (timestamp / 100L) * (clock / 1000L) / 10000L;
+	private static long getRtpTimestamp(final long timestampNs, final long clock) {
+		return (timestampNs / 100L) * (clock / 1000L) / 10000L;
 	}
 
 	/** 

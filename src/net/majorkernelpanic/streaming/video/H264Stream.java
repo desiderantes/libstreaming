@@ -57,8 +57,8 @@ public class H264Stream extends VideoStream {
 	 * Constructs the H.264 stream.
 	 * Uses CAMERA_FACING_BACK by default.
 	 */
-	public H264Stream() {
-		this(CameraInfo.CAMERA_FACING_BACK);
+	public H264Stream(final long startTimeNs) {
+		this(startTimeNs, CameraInfo.CAMERA_FACING_BACK);
 	}
 
 	/**
@@ -66,12 +66,12 @@ public class H264Stream extends VideoStream {
 	 * @param cameraId Can be either CameraInfo.CAMERA_FACING_BACK or CameraInfo.CAMERA_FACING_FRONT
 	 * @throws IOException
 	 */
-	public H264Stream(int cameraId) {
+	public H264Stream(final long startTimeNs, int cameraId) {
 		super(cameraId);
 		mMimeType = "video/avc";
 		mCameraImageFormat = ImageFormat.NV21;
 		mVideoEncoder = MediaRecorder.VideoEncoder.H264;
-		mPacketizer = new H264Packetizer();
+		mPacketizer = new H264Packetizer(startTimeNs);
 	}
 
 	/**

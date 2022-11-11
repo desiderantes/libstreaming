@@ -40,8 +40,8 @@ public abstract class AudioStream extends MediaStream implements IAudioStream {
 	@NonNull
 	protected AudioQuality mQuality = mRequestedQuality.clone();
 
-	public AudioStream() {
-		super();
+	public AudioStream(final long startTimeNs) {
+		super(startTimeNs);
 	}
 
 	@Override

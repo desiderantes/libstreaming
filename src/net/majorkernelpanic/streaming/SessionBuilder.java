@@ -69,6 +69,7 @@ public class SessionBuilder implements Cloneable {
 	public static final int DESTINATION_PORT_VIDEO = 5006;
 	public static final int DESTINATION_PORT_AUDIO = 5004;
 
+	private final long mStartTimeNs = System.nanoTime();
 	// Default configuration
 	@NonNull
 	private VideoQuality mVideoQuality = VideoQuality.DEFAULT_VIDEO_QUALITY;
@@ -118,21 +119,21 @@ public class SessionBuilder implements Cloneable {
 
 			switch (builder.getAudioEncoder()) {
 			case AUDIO_AAC:
-				final AACStream stream = new AACStream();
+				final AACStream stream = new AACStream(builder.getStartTimeNs());
 				session.addAudioTrack(stream);
 				stream.setPreferences(PreferenceManager.getDefaultSharedPreferences(context));
 				break;
 			case AUDIO_AMRNB:
-				session.addAudioTrack(new AMRNBStream());
+				session.addAudioTrack(new AMRNBStream(builder.getStartTimeNs()));
 				break;
 			}
 
 			switch (builder.getVideoEncoder()) {
 			case VIDEO_H263:
-				session.addVideoTrack(new H263Stream(builder.getCamera()));
+				session.addVideoTrack(new H263Stream(builder.getStartTimeNs(), builder.getCamera()));
 				break;
 			case VIDEO_H264:
-				final H264Stream stream = new H264Stream(builder.getCamera());
+				final H264Stream stream = new H264Stream(builder.getStartTimeNs(), builder.getCamera());
 				stream.setPreferences(PreferenceManager.getDefaultSharedPreferences(context));
 				session.addVideoTrack(stream);
 				break;
@@ -348,6 +349,10 @@ public class SessionBuilder implements Cloneable {
 	@NonNull
 	public Bundle getSettings() {
 		return mSettings;
+	}
+
+	public long getStartTimeNs() {
+		return mStartTimeNs;
 	}
 
 	/** Returns a new {@link SessionBuilder} with the same configuration. */

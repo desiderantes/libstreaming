@@ -88,8 +88,8 @@ public class AACStream extends AudioStream {
 	private AudioRecord mAudioRecord = null;
 	private Thread mThread = null;
 
-	public AACStream() {
-		super();
+	public AACStream(final long startTimeNs) {
+		super(startTimeNs);
 
 		if (!AACStreamingSupported()) {
 			Log.e(TAG,"AAC not supported on this phone");
@@ -144,9 +144,9 @@ public class AACStream extends AudioStream {
 		if (mMode != mRequestedMode || mPacketizer==null) {
 			mMode = mRequestedMode;
 			if (mMode == MODE_MEDIARECORDER_API) {
-				mPacketizer = new AACADTSPacketizer();
+				mPacketizer = new AACADTSPacketizer(getStartTimeNs());
 			} else { 
-				mPacketizer = new AACLATMPacketizer();
+				mPacketizer = new AACLATMPacketizer(getStartTimeNs());
 			}
 			mPacketizer.setDestination(mDestination, mRtpPort, mRtcpPort);
 			mPacketizer.getRtpSocket().setOutputStream(mOutputStream, mChannelIdentifier);

@@ -27,7 +27,11 @@ public abstract class MediaStream extends net.majorkernelpanic.streaming.MediaSt
    @NonNull
    private final Bundle mSettings = new Bundle();
 
-   /**
+	public MediaStream(final long startTimeNs) {
+		super(startTimeNs);
+	}
+
+	/**
   	 * Some data (SPS and PPS params) needs to be stored when {@link #getSessionDescription()} is called
   	 * @param settings The SharedPreferences that will be used to save SPS and PPS parameters
   	 */

@@ -44,8 +44,8 @@ public class H263Stream extends VideoStream {
 	 * Uses CAMERA_FACING_BACK by default.
 	 * @throws IOException
 	 */
-	public H263Stream() throws IOException {
-		this(CameraInfo.CAMERA_FACING_BACK);
+	public H263Stream(final long startTimeNs) throws IOException {
+		this(startTimeNs, CameraInfo.CAMERA_FACING_BACK);
 	}	
 
 	/**
@@ -53,11 +53,11 @@ public class H263Stream extends VideoStream {
 	 * @param cameraId Can be either CameraInfo.CAMERA_FACING_BACK or CameraInfo.CAMERA_FACING_FRONT 
 	 * @throws IOException
 	 */	
-	public H263Stream(int cameraId) {
+	public H263Stream(final long startTimeNs, int cameraId) {
 		super(cameraId);
 		mCameraImageFormat = ImageFormat.NV21;
 		mVideoEncoder = MediaRecorder.VideoEncoder.H263;
-		mPacketizer = new H263Packetizer();
+		mPacketizer = new H263Packetizer(startTimeNs);
 	}
 
 	/**

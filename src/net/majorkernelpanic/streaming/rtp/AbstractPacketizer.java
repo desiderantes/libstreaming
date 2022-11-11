@@ -42,10 +42,10 @@ abstract public class AbstractPacketizer {
 	
 	protected long ts = 0;
 
-	public AbstractPacketizer() {
+	public AbstractPacketizer(final long startTimeNs) {
 		int ssrc = new Random().nextInt();
 		ts = new Random().nextInt();
-		socket = new RtpSocket();
+		socket = new RtpSocket(startTimeNs);
 		socket.setSSRC(ssrc);
 	}
 

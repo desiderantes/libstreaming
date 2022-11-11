@@ -72,8 +72,8 @@ public abstract class VideoStream extends MediaStream implements IVideoStream {
 	 * Don't use this class directly.
 	 * Uses CAMERA_FACING_BACK by default.
 	 */
-	public VideoStream(final int videoEncoder) {
-		super();
+	public VideoStream(final long startTimeNs, final int videoEncoder) {
+		super(startTimeNs);
 		mVideoEncoder = videoEncoder;
 	}
 

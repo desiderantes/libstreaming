@@ -38,8 +38,8 @@ public class H263Packetizer extends AbstractPacketizer implements Runnable {
 
 	private Thread t;
 
-	public H263Packetizer() {
-		super();
+	public H263Packetizer(final long startTimeNs) {
+		super(startTimeNs);
 		socket.setClockFrequency(90000);
 	}
 

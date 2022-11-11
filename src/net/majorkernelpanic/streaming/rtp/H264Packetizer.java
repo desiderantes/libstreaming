@@ -46,8 +46,8 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
 	private int streamType = 1;
 
 
-	public H264Packetizer() {
-		super();
+	public H264Packetizer(final long startTimeNs) {
+		super(startTimeNs);
 		socket.setClockFrequency(90000);
 	}
 

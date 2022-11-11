@@ -65,7 +65,7 @@ public abstract class MediaStream implements IMediaStream {
 	 * by using  {@link #PIPE_API_LS} and {@link #PIPE_API_PFD}.
 	 */
 	protected final static byte sPipeApi;
-	
+	private final long mStartTimeNs;
 	private boolean mStreaming = false, mConfigured = false;
 	protected int mRtpPort = 0, mRtcpPort = 0; 
 	protected byte mChannelIdentifier = 0;
@@ -106,9 +106,14 @@ public abstract class MediaStream implements IMediaStream {
 		}
 	}
 
-	public MediaStream() {
+	public MediaStream(final long startTimeNs) {
+		mStartTimeNs = startTimeNs;
 		mRequestedMode = sSuggestedMode;
 		mMode = sSuggestedMode;
+	}
+
+	public long getStartTimeNs() {
+		return mStartTimeNs;
 	}
 
 	/** 
