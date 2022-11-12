@@ -26,12 +26,11 @@ import android.os.ParcelFileDescriptor;
 import android.util.Log;
 import android.view.Surface;
 
+import com.serenegiant.media.MediaCodecUtils;
 import com.serenegiant.streaming.MediaStream;
-import com.serenegiant.streaming.hw.EncoderDebugger;
 
 import net.majorkernelpanic.streaming.Stream;
 import net.majorkernelpanic.streaming.exceptions.ConfNotSupportedException;
-import net.majorkernelpanic.streaming.hw.NV21Convertor;
 import net.majorkernelpanic.streaming.rtp.MediaCodecInputStream;
 import net.majorkernelpanic.streaming.video.IVideoStream;
 import net.majorkernelpanic.streaming.video.VideoQuality;
@@ -61,9 +60,7 @@ public abstract class VideoStream extends MediaStream implements IVideoStream {
 	private final int mVideoEncoder;
 	protected int mRequestedOrientation = 0, mOrientation = 0;
 
-	private boolean mPreviewStarted = false;
-
-	protected String mMimeType;
+	protected final String mMimeType;
 	protected String mEncoderName;
 	protected int mEncoderColorFormat;
 	protected int mMaxFps = 0;
@@ -74,6 +71,8 @@ public abstract class VideoStream extends MediaStream implements IVideoStream {
 	 */
 	public VideoStream(final long startTimeNs, final int videoEncoder) {
 		super(startTimeNs);
+		mMimeType = "video/avc";
+		mMode = MODE_MEDIACODEC_API_2;
 		mVideoEncoder = videoEncoder;
 	}
 
@@ -116,6 +115,7 @@ public abstract class VideoStream extends MediaStream implements IVideoStream {
 	 */
 	public synchronized void configure() throws IllegalStateException, IOException {
 		super.configure();
+		mMode = MODE_MEDIACODEC_API_2;
 		mOrientation = mRequestedOrientation;
 	}
 
@@ -170,9 +170,6 @@ public abstract class VideoStream extends MediaStream implements IVideoStream {
 
 		// We need a local socket to forward data output by the camera to the packetizer
 		createSockets();
-
-		// Reopens the camera if needed
-		destroyCamera();
 
 		try {
 			mMediaRecorder = new MediaRecorder();
@@ -243,49 +240,8 @@ public abstract class VideoStream extends MediaStream implements IVideoStream {
 			// Uses the method MediaCodec.createInputSurface to feed the encoder
 			encodeWithMediaCodecMethod2();
 		} else {
-			// Uses dequeueInputBuffer to feed the encoder
-			encodeWithMediaCodecMethod1();
+			throw new UnsupportedOperationException("only supports MODE_MEDIACODEC_API_2");
 		}
-	}
-
-	/**
-	 * Video encoding is done by a MediaCodec.
-	 */
-	@SuppressLint("NewApi")
-	protected void encodeWithMediaCodecMethod1() throws RuntimeException, IOException {
-
-		Log.d(TAG, "Video encoded using the MediaCodec API with a buffer");
-
-		// Estimates the frame rate of the camera
-		// Starts the preview if needed
-		if (!mPreviewStarted) {
-			try {
-				mPreviewStarted = true;
-			} catch (RuntimeException e) {
-				destroyCamera();
-				throw e;
-			}
-		}
-
-		final EncoderDebugger debugger = EncoderDebugger.debug(getSettings(), mQuality.resX, mQuality.resY);
-		final NV21Convertor convertor = debugger.getNV21Convertor();
-
-		mMediaCodec = MediaCodec.createByCodecName(debugger.getEncoderName());
-		MediaFormat mediaFormat = MediaFormat.createVideoFormat("video/avc", mQuality.resX, mQuality.resY);
-		mediaFormat.setInteger(MediaFormat.KEY_BIT_RATE, mQuality.bitrate);
-		mediaFormat.setInteger(MediaFormat.KEY_FRAME_RATE, mQuality.framerate);
-		mediaFormat.setInteger(MediaFormat.KEY_COLOR_FORMAT, debugger.getEncoderColorFormat());
-		mediaFormat.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 1);
-
-		mMediaCodec.configure(mediaFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
-		final Surface surface = mMediaCodec.createInputSurface();
-		mSurfaceId = mSource.addSurface(surface);
-		mMediaCodec.start();
-
-		// The packetizer encapsulates the bit stream in an RTP stream and send it over the network
-		mPacketizer.setInputStream(MediaCodecInputStream.newInstance(mMediaCodec));
-		mPacketizer.start();
-
 	}
 
 	/**
@@ -297,11 +253,8 @@ public abstract class VideoStream extends MediaStream implements IVideoStream {
 
 		Log.d(TAG, "Video encoded using the MediaCodec API with a surface");
 
-		// Estimates the frame rate of the camera
-		EncoderDebugger debugger = EncoderDebugger.debug(getSettings(), mQuality.resX, mQuality.resY);
-
-		mMediaCodec = MediaCodec.createByCodecName(debugger.getEncoderName());
-		MediaFormat mediaFormat = MediaFormat.createVideoFormat("video/avc", mQuality.resX, mQuality.resY);
+		mMediaCodec = MediaCodec.createEncoderByType(mMimeType);
+		final MediaFormat mediaFormat = MediaFormat.createVideoFormat(mMimeType, mQuality.resX, mQuality.resY);
 		mediaFormat.setInteger(MediaFormat.KEY_BIT_RATE, mQuality.bitrate);
 		mediaFormat.setInteger(MediaFormat.KEY_FRAME_RATE, mQuality.framerate);
 		mediaFormat.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface);
@@ -310,7 +263,7 @@ public abstract class VideoStream extends MediaStream implements IVideoStream {
 		final Surface surface = mMediaCodec.createInputSurface();
 		mSurfaceId = mSource.addSurface(surface);
 		mMediaCodec.start();
-
+		MediaCodecUtils.dump(TAG + " RTSP", mediaFormat);
 		// The packetizer encapsulates the bit stream in an RTP stream and send it over the network
 		mPacketizer.setInputStream(MediaCodecInputStream.newInstance(mMediaCodec));
 		mPacketizer.start();
@@ -324,10 +277,5 @@ public abstract class VideoStream extends MediaStream implements IVideoStream {
 	 * @throws IllegalStateException Thrown when {@link Stream#configure()} wa not called.
 	 */
 	public abstract String getSessionDescription() throws IllegalStateException;
-
-	protected synchronized void destroyCamera() {
-		if (isStreaming()) super.stop();
-		mPreviewStarted = false;
-	}
 
 }

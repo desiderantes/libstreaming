@@ -17,13 +17,13 @@
 
 package com.serenegiant.streaming.video;
 
-import android.annotation.SuppressLint;
+import android.media.MediaFormat;
 import android.media.MediaRecorder;
 import android.service.textservice.SpellCheckerService.Session;
 import android.util.Base64;
-import android.util.Log;
 
-import com.serenegiant.streaming.hw.EncoderDebugger;
+import com.serenegiant.media.MediaCodecUtils;
+import com.serenegiant.media.VideoConfig;
 
 import net.majorkernelpanic.streaming.SessionBuilder;
 import net.majorkernelpanic.streaming.mp4.MP4Config;
@@ -31,6 +31,7 @@ import net.majorkernelpanic.streaming.rtp.H264Packetizer;
 import net.majorkernelpanic.streaming.video.VideoQuality;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.concurrent.Semaphore;
 
 /**
@@ -53,9 +54,7 @@ public class H264Stream extends VideoStream {
 	 */
 	public H264Stream(final long startTimeNs) {
 		super(startTimeNs, MediaRecorder.VideoEncoder.H264);
-		mMimeType = "video/avc";
 		mPacketizer = new H264Packetizer(startTimeNs);
-		mMode = MODE_MEDIACODEC_API_2;
 	}
 
 	/**
@@ -97,19 +96,22 @@ public class H264Stream extends VideoStream {
 	 * and determines the pps and sps. Should not be called by the UI thread.
 	 **/
 	private MP4Config testH264() throws IllegalStateException, IOException {
-		return testMediaCodecAPI();
-	}
-
-	@SuppressLint("NewApi")
-	private MP4Config testMediaCodecAPI() throws RuntimeException, IOException {
-		try {
-			final EncoderDebugger debugger = EncoderDebugger.debug(getSettings(), mQuality.resX, mQuality.resY);
-			return new MP4Config(debugger.getB64SPS(), debugger.getB64PPS());
-		} catch (Exception e) {
-			// Fallback on the old streaming method using the MediaRecorder API
-			Log.e(TAG,"Resolution not supported with the MediaCodec API, we fallback on the old streamign method.");
-			return testH264();
-		}
+		final VideoConfig config = new VideoConfig()
+			.setCaptureFps(mQuality.framerate)
+			.setIFrameIntervals(mQuality.framerate / 30.0f)	// 1秒毎
+			.setBPP(mQuality.resX, mQuality.resY, mQuality.bitrate);
+		final MediaFormat format = MediaCodecUtils.testVideoMediaFormat(
+			mMimeType, mQuality.resX, mQuality.resY, config);
+		if (DEBUG) MediaCodecUtils.dump(TAG, format);
+		final ByteBuffer spsb = format.getByteBuffer("csd-0");
+		final ByteBuffer ppsb = format.getByteBuffer("csd-1");
+		final byte[] sps = new byte[spsb.capacity()-4];
+		spsb.position(4);
+		spsb.get(sps);
+		final byte[] pps = new byte[ppsb.capacity()-4];
+		ppsb.position(4);
+		ppsb.get(pps);
+		return new MP4Config(sps, pps);
 	}
 
 }
