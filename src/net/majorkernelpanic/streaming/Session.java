@@ -119,15 +119,15 @@ public class Session {
 	private String mOrigin;
 	private String mDestination;
 	private int mTimeToLive = 64;
-	private long mTimestamp;
+	private final long mTimestamp;
 
 	private IAudioStream mAudioStream = null;
 	private IVideoStream mVideoStream = null;
 
 	private Callback mCallback;
-	private Handler mMainHandler;
+	private final Handler mMainHandler;
 
-	private Handler mHandler;
+	private final Handler mHandler;
 	@NonNull
 	private static final SecureRandom sRandom = new SecureRandom();
 
