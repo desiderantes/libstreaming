@@ -112,6 +112,14 @@ public abstract class MediaCodecInputStream extends InputStream {
 			mBuffers = mMediaCodec.getOutputBuffers();
 		}
 
+		/**
+		 * FIXME This is quiet bad implementation, buffer from mediacodec should be released as soon as possible!!
+		 * @param buffer
+		 * @param offset
+		 * @param length
+		 * @return
+		 * @throws IOException
+		 */
 		@SuppressWarnings("deprecation")
 		@Override
 		public int read(@NonNull final byte[] buffer, final int offset, final int length) throws IOException {
@@ -168,6 +176,14 @@ public abstract class MediaCodecInputStream extends InputStream {
 			super(mediaCodec);
 		}
 
+		/**
+		 * FIXME This is quiet bad implementation, buffer from mediacodec should be released as soon as possible!!
+		 * @param buffer
+		 * @param offset
+		 * @param length
+		 * @return
+		 * @throws IOException
+		 */
 		@Override
 		public int read(@NonNull final byte[] buffer, final int offset, final int length) throws IOException {
 			int min = 0;
