@@ -27,13 +27,18 @@ import android.os.Build;
 import android.util.Log;
 
 import com.serenegiant.media.MediaCodecUtils;
+import com.serenegiant.media.MemMediaQueue;
+import com.serenegiant.media.RecycleMediaData;
 import com.serenegiant.system.BuildCheck;
+import com.serenegiant.utils.ThreadUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.util.concurrent.TimeUnit;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 /**
  * An InputStream that uses data from a MediaCodec.
@@ -42,8 +47,11 @@ import androidx.annotation.NonNull;
  */
 @SuppressLint("NewApi")
 public abstract class MediaCodecInputStream extends InputStream {
-	private static final boolean DEBUG = false;	// set false on production
+	private static final boolean DEBUG = true;	// set false on production
 	private static final String TAG = MediaCodecInputStream.class.getSimpleName();
+
+	private static final long TIMEOUT_MS = 10;
+	private static final long TIMEOUT_USEC = TIMEOUT_MS * 1000L;	// 10ミリ秒
 
 	public static MediaCodecInputStream newInstance(@NonNull final MediaCodec mediaCodec) {
 		if (BuildCheck.isAPI21()) {
@@ -56,13 +64,19 @@ public abstract class MediaCodecInputStream extends InputStream {
 	@NonNull
 	protected final MediaCodec mMediaCodec;
 	@NonNull
-	protected final BufferInfo mBufferInfo = new BufferInfo();
-	protected ByteBuffer mBuffer = null;
-	protected int mIndex = -1;
+	protected final BufferInfo mLastBufferInfo = new BufferInfo();
+	@NonNull
+	protected final MemMediaQueue mQueue = new MemMediaQueue(4, 200);
+	@Nullable
+	private RecycleMediaData mData = null;
+	private ByteBuffer mBuffer;
 	private volatile boolean mClosed = false;
-	protected volatile long mLastPresentationTimeUs;
+	private volatile long mLastPresentationTimeUs;
 
+	@Nullable
 	public MediaFormat mMediaFormat;
+	@Nullable
+	private Thread mReapThread;
 
 	private MediaCodecInputStream(@NonNull final MediaCodec mediaCodec) {
 		mMediaCodec = mediaCodec;
@@ -75,6 +89,13 @@ public abstract class MediaCodecInputStream extends InputStream {
 	@Override
 	public void close() {
 		mClosed = true;
+		final Thread reapThread = mReapThread;
+		mReapThread = null;
+		if ((reapThread != null) && !reapThread.isInterrupted()) {
+			// wait for a little to reduce InterruptException in MediaCodec
+			ThreadUtils.NoThrowSleep(TIMEOUT_MS);
+//			reapThread.interrupt();
+		}
 	}
 
 	@Override
@@ -83,28 +104,100 @@ public abstract class MediaCodecInputStream extends InputStream {
 	}
 
 	public int available() {
-		if (mBuffer != null) {
-			return mBufferInfo.size - mBuffer.position();
-		} else {
-			return 0;
-		}
+		return mBuffer != null ? mBuffer.remaining() : 0;
 	}
 
 	@Deprecated
 	@NonNull
 	public BufferInfo getLastBufferInfo() {
-		return mBufferInfo;
+		return mLastBufferInfo;
 	}
 
 	public long presentationTimeUs() {
 		return mLastPresentationTimeUs;
 	}
 
+	protected abstract void reap();
+
+	private void startReaper() {
+//		if (DEBUG) Log.v(TAG, "startReaper:");
+		if (!Thread.interrupted() && !isClosed() && (mReapThread == null)) {
+			mReapThread = new Thread(new Runnable() {
+				@Override
+				public void run() {
+					if (DEBUG) Log.i(TAG, "start reaper thread");
+					while (!Thread.interrupted() && !isClosed()) {
+						try {
+							reap();
+						} catch (final IllegalStateException e) {
+							mClosed = true;
+							break;
+						} catch (final Exception e) {
+							if (DEBUG) Log.w(TAG, "mReapThread#run:", e);
+							mClosed = true;
+							break;
+						}
+					}
+					if (DEBUG) Log.i(TAG, "reaper thread finished");
+				}
+			});
+			mReapThread.start();
+		}
+	}
+
+	/**
+	 * @param buffer
+	 * @param offset
+	 * @param length
+	 * @return
+	 * @throws IOException
+	 */
+	@Override
+	public int read(@NonNull final byte[] buffer, final int offset, final int length) throws IOException {
+//		if (DEBUG) Log.v(TAG, "read:");
+		int min = 0;
+		try {
+			RecycleMediaData data = mData;
+			if (data == null) {
+				startReaper();
+				while (!Thread.interrupted() && !isClosed()) {
+					data = mQueue.poll(50, TimeUnit.MILLISECONDS);
+					if (data != null) {
+						data.get(mLastBufferInfo);
+						mLastPresentationTimeUs = data.presentationTimeUs();
+						mBuffer = data.getRaw().asReadOnlyBuffer();
+						break;
+					}
+				}
+			}
+			if (isClosed()) throw new IOException("This InputStream was closed");
+			if (data != null) {
+				final ByteBuffer buf = mBuffer;
+				min = Math.min(length, buf.remaining());
+				buf.get(buffer, offset, min);
+				if (buf.remaining() == 0) {
+					mQueue.recycle(data);
+					data = null;
+				}
+			}
+			mData = data;
+		} catch (final InterruptedException e) {
+			mClosed = true;
+		} catch (final RuntimeException e) {
+			if (DEBUG) Log.w(TAG, "read:", e);
+		}
+
+//		if (DEBUG) Log.v(TAG, "read:finished,min=" + min);
+		return min;
+	}
+
 	/**
 	 * MediaCodecInputStream implementation for API<21
 	 */
 	private static class MediaCodecInputStreamOld extends MediaCodecInputStream {
-		protected ByteBuffer[] mBuffers;
+		@NonNull
+		private final BufferInfo mInfo = new BufferInfo();
+		private ByteBuffer[] mBuffers;
 
 		@SuppressWarnings("deprecation")
 		private MediaCodecInputStreamOld(@NonNull final MediaCodec mediaCodec) {
@@ -112,58 +205,44 @@ public abstract class MediaCodecInputStream extends InputStream {
 			mBuffers = mMediaCodec.getOutputBuffers();
 		}
 
-		/**
-		 * FIXME This is quiet bad implementation, buffer from mediacodec should be released as soon as possible!!
-		 * @param buffer
-		 * @param offset
-		 * @param length
-		 * @return
-		 * @throws IOException
-		 */
-		@SuppressWarnings("deprecation")
 		@Override
-		public int read(@NonNull final byte[] buffer, final int offset, final int length) throws IOException {
-			int min = 0;
-
-			try {
-				ByteBuffer buf = mBuffer;
-				if (buf == null) {
-					while (!Thread.interrupted() && !isClosed()) {
-						mIndex = mMediaCodec.dequeueOutputBuffer(mBufferInfo, 500000);
-						if (mIndex >= 0) {
-							//Log.d(TAG,"Index: "+mIndex+" Time: "+mBufferInfo.presentationTimeUs+" size: "+mBufferInfo.size);
-							buf = mBuffers[mIndex];
-							buf.position(0);
-							mLastPresentationTimeUs = mBufferInfo.presentationTimeUs;
+		protected void reap() {
+			if (!isClosed()) {
+				final RecycleMediaData data = mQueue.obtain();
+				if (data != null) {
+					boolean queued = false;
+					for (int i = 0; i < 3; i++) {
+						if (Thread.interrupted() || isClosed()) break;
+						final int index = mMediaCodec.dequeueOutputBuffer(mInfo, TIMEOUT_USEC);
+						if (Thread.interrupted() || isClosed()) break;
+						if (index >= 0) {
+							final ByteBuffer buf = mBuffers[index];
+							data.set(buf, mInfo);
+							mMediaCodec.releaseOutputBuffer(index, false);
+//							if (DEBUG) Log.d(TAG, "reap: index=" + index
+//								+ ",pts=" + mInfo.presentationTimeUs
+//								+ ",offset=" + mInfo.offset
+//								+ ",size=" + mInfo.size + "/" + data.size());
+							mQueue.queueFrame(data);
+							queued = true;
 							break;
-						} else if (mIndex == MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED) {
+						} else if (index == MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED) {
 							mBuffers = mMediaCodec.getOutputBuffers();
-						} else if (mIndex == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
+						} else if (index == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
 							mMediaFormat = mMediaCodec.getOutputFormat();
 							if (DEBUG) MediaCodecUtils.dump(mMediaFormat);
-						} else if (mIndex != MediaCodec.INFO_TRY_AGAIN_LATER) {
-							Log.e(TAG, "Message: " + mIndex);
+						} else if (index != MediaCodec.INFO_TRY_AGAIN_LATER) {
+							Log.e(TAG, "Message: " + index);
 							//return 0;
 						}
 					}
-				}
-
-				if (isClosed()) throw new IOException("This InputStream was closed");
-
-				if (buf != null) {
-					min = Math.min(length, mBufferInfo.size - buf.position());
-					buf.get(buffer, offset, min);
-					if (buf.position() >= mBufferInfo.size) {
-						mMediaCodec.releaseOutputBuffer(mIndex, false);
-						buf = null;
+					if (!queued) {
+						data.recycle();
 					}
+				} else {
+					if (DEBUG) Log.v(TAG, "reap: pool is empty");
 				}
-				mBuffer = buf;
-			} catch (final RuntimeException e) {
-				e.printStackTrace();
 			}
-
-			return min;
 		}
 	}
 
@@ -172,59 +251,46 @@ public abstract class MediaCodecInputStream extends InputStream {
 	 */
 	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
 	private static class MediaCodecInputStreamApi21 extends MediaCodecInputStream {
+		private final BufferInfo mInfo = new BufferInfo();
 		private MediaCodecInputStreamApi21(@NonNull final MediaCodec mediaCodec) {
 			super(mediaCodec);
 		}
 
-		/**
-		 * FIXME This is quiet bad implementation, buffer from mediacodec should be released as soon as possible!!
-		 * @param buffer
-		 * @param offset
-		 * @param length
-		 * @return
-		 * @throws IOException
-		 */
 		@Override
-		public int read(@NonNull final byte[] buffer, final int offset, final int length) throws IOException {
-			int min = 0;
-
-			try {
-				ByteBuffer buf = mBuffer;
-				if (buf == null) {
-					while (!Thread.interrupted() && !isClosed()) {
-						mIndex = mMediaCodec.dequeueOutputBuffer(mBufferInfo, 500000);
-						if (mIndex >= 0) {
-							//Log.d(TAG,"Index: "+mIndex+" Time: "+mBufferInfo.presentationTimeUs+" size: "+mBufferInfo.size);
-							buf = mMediaCodec.getOutputBuffer(mIndex);
-							buf.position(0);
-							mLastPresentationTimeUs = mBufferInfo.presentationTimeUs;
+		protected void reap() {
+			if (!isClosed()) {
+				final RecycleMediaData data = mQueue.obtain();
+				if (data != null) {
+					boolean queued = false;
+					for (int i = 0; i < 3; i++) {
+						if (Thread.interrupted() || isClosed()) break;
+						final int index = mMediaCodec.dequeueOutputBuffer(mInfo, TIMEOUT_USEC);
+						if (index >= 0) {
+							final ByteBuffer buf = mMediaCodec.getOutputBuffer(index);
+							data.set(buf, mInfo);
+							mMediaCodec.releaseOutputBuffer(index, false);
+//							if (DEBUG) Log.d(TAG, "reap: index=" + index
+//								+ ",pts=" + mInfo.presentationTimeUs
+//								+ ",offset=" + mInfo.offset
+//								+ ",size=" + mInfo.size + "/" + data.size());
+							mQueue.queueFrame(data);
+							queued = true;
 							break;
-						} else if (mIndex == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
+						} else if (index == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
 							mMediaFormat = mMediaCodec.getOutputFormat();
 							if (DEBUG) MediaCodecUtils.dump(mMediaFormat);
-						} else if (mIndex != MediaCodec.INFO_TRY_AGAIN_LATER) {
-							Log.e(TAG, "Message: " + mIndex);
+						} else if (index != MediaCodec.INFO_TRY_AGAIN_LATER) {
+							Log.e(TAG, "Message: " + index);
 							//return 0;
 						}
 					}
-				}
-
-				if (isClosed()) throw new IOException("This InputStream was closed");
-
-				if (buf != null) {
-					min = Math.min(length, mBufferInfo.size - buf.position());
-					buf.get(buffer, offset, min);
-					if (buf.position() >= mBufferInfo.size) {
-						mMediaCodec.releaseOutputBuffer(mIndex, false);
-						buf = null;
+					if (!queued) {
+						data.recycle();
 					}
+				} else {
+					if (DEBUG) Log.v(TAG, "reap: pool is empty");
 				}
-				mBuffer = buf;
-			} catch (final RuntimeException e) {
-				e.printStackTrace();
 			}
-
-			return min;
 		}
 	}
 }
