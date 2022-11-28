@@ -76,14 +76,13 @@ public class AACLATMPacketizer extends AbstractPacketizer implements Runnable {
 
 		Log.d(TAG,"AAC LATM packetizer started !");
 
-		int length = 0;
 		long oldts;
 		BufferInfo bufferInfo;
 
 		try {
 			while (!Thread.interrupted()) {
 				buffer = socket.requestBuffer();
-				length = is.read(buffer, rtphl+4, MAXPACKETSIZE-(rtphl+4));
+				final int length = is.read(buffer, rtphl+4, MAXPACKETSIZE-(rtphl+4));
 				
 				if (length>0) {
 					

@@ -245,9 +245,9 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
 	}
 
 	private int fill(byte[] buffer, int offset,int length) throws IOException {
-		int sum = 0, len;
+		int sum = 0;
 		while (sum<length) {
-			len = is.read(buffer, offset+sum, length-sum);
+			final int len = is.read(buffer, offset+sum, length-sum);
 			if (len<0) {
 				throw new IOException("End of stream");
 			}
