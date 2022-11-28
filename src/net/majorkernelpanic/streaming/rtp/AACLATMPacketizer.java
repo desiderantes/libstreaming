@@ -87,11 +87,12 @@ public class AACLATMPacketizer extends AbstractPacketizer implements Runnable {
 				
 				if (length>0) {
 					
-					bufferInfo = ((MediaCodecInputStream)is).getLastBufferInfo();
+//					bufferInfo = ((MediaCodecInputStream)is).getLastBufferInfo();
 					//Log.d(TAG,"length: "+length+" ts: "+bufferInfo.presentationTimeUs);
 					oldts = ts;
-					ts = bufferInfo.presentationTimeUs*1000;
-					
+//					ts = bufferInfo.presentationTimeUs*1000;
+					ts = ((MediaCodecInputStream)is).presentationTimeUs() * 1000L;
+
 					// Seems to happen sometimes
 					if (oldts>ts) {
 						socket.commitBuffer();

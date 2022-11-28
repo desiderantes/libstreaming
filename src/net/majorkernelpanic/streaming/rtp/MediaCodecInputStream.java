@@ -60,6 +60,7 @@ public abstract class MediaCodecInputStream extends InputStream {
 	protected ByteBuffer mBuffer = null;
 	protected int mIndex = -1;
 	private volatile boolean mClosed = false;
+	protected volatile long mLastPresentationTimeUs;
 
 	public MediaFormat mMediaFormat;
 
@@ -89,9 +90,14 @@ public abstract class MediaCodecInputStream extends InputStream {
 		}
 	}
 
+	@Deprecated
 	@NonNull
 	public BufferInfo getLastBufferInfo() {
 		return mBufferInfo;
+	}
+
+	public long presentationTimeUs() {
+		return mLastPresentationTimeUs;
 	}
 
 	/**
@@ -120,6 +126,7 @@ public abstract class MediaCodecInputStream extends InputStream {
 							//Log.d(TAG,"Index: "+mIndex+" Time: "+mBufferInfo.presentationTimeUs+" size: "+mBufferInfo.size);
 							buf = mBuffers[mIndex];
 							buf.position(0);
+							mLastPresentationTimeUs = mBufferInfo.presentationTimeUs;
 							break;
 						} else if (mIndex == MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED) {
 							mBuffers = mMediaCodec.getOutputBuffers();
@@ -174,6 +181,7 @@ public abstract class MediaCodecInputStream extends InputStream {
 							//Log.d(TAG,"Index: "+mIndex+" Time: "+mBufferInfo.presentationTimeUs+" size: "+mBufferInfo.size);
 							buf = mMediaCodec.getOutputBuffer(mIndex);
 							buf.position(0);
+							mLastPresentationTimeUs = mBufferInfo.presentationTimeUs;
 							break;
 						} else if (mIndex == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
 							mMediaFormat = mMediaCodec.getOutputFormat();
