@@ -47,7 +47,7 @@ import androidx.annotation.Nullable;
  */
 @SuppressLint("NewApi")
 public abstract class MediaCodecInputStream extends InputStream {
-	private static final boolean DEBUG = true;	// set false on production
+	private static final boolean DEBUG = false;	// set false on production
 	private static final String TAG = MediaCodecInputStream.class.getSimpleName();
 
 	private static final long TIMEOUT_MS = 10;
