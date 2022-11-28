@@ -191,7 +191,7 @@ public class AACStream extends AudioStream {
 		format.setInteger(MediaFormat.KEY_CHANNEL_COUNT, 1);
 		format.setInteger(MediaFormat.KEY_SAMPLE_RATE, mQuality.samplingRate);
 		format.setInteger(MediaFormat.KEY_AAC_PROFILE, MediaCodecInfo.CodecProfileLevel.AACObjectLC);
-		format.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, bufferSize);
+//		format.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, bufferSize);
 		mMediaCodec.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
 		audioSource.start();
 		mMediaCodec.start();
@@ -202,19 +202,18 @@ public class AACStream extends AudioStream {
 		final Thread thread = new Thread(new Runnable() {
 			@Override
 			public void run() {
-				int len, bufferIndex;
 				try {
 					while (!Thread.interrupted() && isStreaming()) {
-						bufferIndex = mMediaCodec.dequeueInputBuffer(10000/*10ms*/);
+						final int bufferIndex = mMediaCodec.dequeueInputBuffer(10000/*10ms*/);
 						if (bufferIndex >= 0) {
 							inputBuffers[bufferIndex].clear();
-							len = audioSource.read(inputBuffers[bufferIndex], bufferSize);
+							int len = audioSource.read(inputBuffers[bufferIndex], bufferSize);
 							if (len == AudioRecord.ERROR_INVALID_OPERATION || len == AudioRecord.ERROR_BAD_VALUE) {
-								Log.e(TAG, "An error occurred with the AudioRecord API !");
-							} else {
-								//Log.v(TAG,"Pushing raw audio to the decoder: len="+len+" bs: "+inputBuffers[bufferIndex].capacity());
-								mMediaCodec.queueInputBuffer(bufferIndex, 0, len, System.nanoTime() / 1000, 0);
+								Log.e(TAG, "An error occurred with the AudioRecord API !,err=" + len);
+								len = 0;
 							}
+							//Log.v(TAG,"Pushing raw audio to the decoder: len="+len+" bs: "+inputBuffers[bufferIndex].capacity());
+							mMediaCodec.queueInputBuffer(bufferIndex, 0, len, System.nanoTime() / 1000, 0);
 						}
 					}
 				} catch (final RuntimeException e) {
@@ -249,7 +248,7 @@ public class AACStream extends AudioStream {
 		format.setInteger(MediaFormat.KEY_CHANNEL_COUNT, 1);
 		format.setInteger(MediaFormat.KEY_SAMPLE_RATE, mQuality.samplingRate);
 		format.setInteger(MediaFormat.KEY_AAC_PROFILE, MediaCodecInfo.CodecProfileLevel.AACObjectLC);
-		format.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, bufferSize);
+//		format.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, bufferSize);
 		mMediaCodec.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
 		audioSource.start();
 		mMediaCodec.start();
@@ -259,20 +258,19 @@ public class AACStream extends AudioStream {
 		final Thread thread = new Thread(new Runnable() {
 			@Override
 			public void run() {
-				int len, bufferIndex;
 				try {
 					while (!Thread.interrupted() && isStreaming()) {
-						bufferIndex = mMediaCodec.dequeueInputBuffer(10000/*10ms*/);
+						final int bufferIndex = mMediaCodec.dequeueInputBuffer(10000/*10ms*/);
 						if (bufferIndex >= 0) {
 							final ByteBuffer inputBuffer = mMediaCodec.getInputBuffer(bufferIndex);
 							inputBuffer.clear();
-							len = audioSource.read(inputBuffer, bufferSize);
+							int len = audioSource.read(inputBuffer, bufferSize);
 							if (len == AudioRecord.ERROR_INVALID_OPERATION || len == AudioRecord.ERROR_BAD_VALUE) {
-								Log.e(TAG, "An error occurred with the AudioRecord API !");
-							} else {
-								//Log.v(TAG,"Pushing raw audio to the decoder: len="+len+" bs: "+inputBuffers[bufferIndex].capacity());
-								mMediaCodec.queueInputBuffer(bufferIndex, 0, len, System.nanoTime() / 1000, 0);
+								Log.e(TAG, "An error occurred with the AudioRecord API !,err=" + len);
+								len = 0;
 							}
+							//Log.v(TAG,"Pushing raw audio to the decoder: len="+len+" bs: "+inputBuffers[bufferIndex].capacity());
+							mMediaCodec.queueInputBuffer(bufferIndex, 0, len, System.nanoTime() / 1000, 0);
 						}
 					}
 				} catch (final Exception e) {
@@ -297,13 +295,11 @@ public class AACStream extends AudioStream {
 	 */
 	public synchronized void stop() {
 		if (isStreaming()) {
-			if (mMode == MODE_MEDIACODEC_API) {
+			final Thread thread = mThread;
+			mThread = null;
+			if (thread != null) {
 				Log.d(TAG, "Interrupting threads...");
-				final Thread thread = mThread;
-				mThread = null;
-				if (thread != null) {
-					thread.interrupt();
-				}
+				thread.interrupt();
 			}
 			super.stop();
 		}
