@@ -273,6 +273,9 @@ public class AACStream extends AudioStream {
 							mMediaCodec.queueInputBuffer(bufferIndex, 0, len, System.nanoTime() / 1000, 0);
 						}
 					}
+				} catch (final IllegalStateException e) {
+					if (DEBUG) Log.w(TAG, e);
+					// IllegalStateException will occur when MediaCodec stopped
 				} catch (final Exception e) {
 					if (isStreaming() || DEBUG) Log.w(TAG, e);
 				} finally {
