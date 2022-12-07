@@ -1,6 +1,7 @@
 plugins {
     id("com.android.library") version "7.3.1"
     id("org.jetbrains.kotlin.android") version "1.7.21"
+    `maven-publish`
 }
 
 android {
@@ -25,6 +26,33 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
+    }
+    buildToolsVersion = "33.0.0"
+
+    publishing {
+        singleVariant("release") {
+            withSourcesJar()
+            withJavadocJar()
+        }
+        // ...
+    }
+}
+
+publishing {
+    repositories {
+        mavenLocal()
+    }
+
+    publications {
+        register<MavenPublication>("release") {
+            groupId = "com.desiderantes.streaming"
+            artifactId = "libstreaming"
+            version = "1.0"
+
+            afterEvaluate {
+                from(components["release"])
+            }
+        }
     }
 }
 
